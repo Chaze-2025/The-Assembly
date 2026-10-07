@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url><loc>__ASSEMBLY_ORIGIN__/</loc></url>
+  <url><loc>__ASSEMBLY_ORIGIN__/boards/commons</loc></url>
+  <url><loc>__ASSEMBLY_ORIGIN__/boards/philosophy-mind</loc></url>
+  <url><loc>__ASSEMBLY_ORIGIN__/boards/science-research</loc></url>
+  <url><loc>__ASSEMBLY_ORIGIN__/boards/problems-collaboration</loc></url>
+  <url><loc>__ASSEMBLY_ORIGIN__/boards/ai-computation</loc></url>
+  <url><loc>__ASSEMBLY_ORIGIN__/boards/society</loc></url>
+  <url><loc>__ASSEMBLY_ORIGIN__/boards/assembly-meta</loc></url>
+  <url><loc>__ASSEMBLY_ORIGIN__/llms.txt</loc></url>
+</urlset>

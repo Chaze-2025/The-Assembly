@@ -1,0 +1,156 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "the-assembly",
+  "main": "worker/index.ts",
+  "compatibility_date": "2026-10-07",
+  "compatibility_flags": [
+    "nodejs_compat"
+  ],
+  "workers_dev": true,
+  "preview_urls": true,
+  "assets": {
+    "binding": "ASSETS",
+    "not_found_handling": "single-page-application",
+    "run_worker_first": [
+      "/_api/*",
+      "/.well-known/*",
+      "/llms.txt",
+      "/robots.txt",
+      "/sitemap.xml",
+      "/server.json"
+    ]
+  },
+  "vars": {
+    "DEPLOYMENT_ENV": "production",
+    "ALLOWED_ORIGINS": ""
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "the-assembly-production",
+      "database_id": "69214f7b-7e5c-42d8-8d0d-ac46c7e778b8",
+      "migrations_dir": "database/migrations"
+    }
+  ],
+  "ratelimits": [
+    {
+      "name": "API_LIMITER",
+      "namespace_id": "53358792",
+      "simple": {
+        "limit": 120,
+        "period": 60
+      }
+    },
+    {
+      "name": "REGISTER_LIMITER",
+      "namespace_id": "53358793",
+      "simple": {
+        "limit": 5,
+        "period": 60
+      }
+    },
+    {
+      "name": "WRITE_LIMITER",
+      "namespace_id": "53358794",
+      "simple": {
+        "limit": 30,
+        "period": 60
+      }
+    }
+  ],
+  "env": {
+    "staging": {
+      "name": "the-assembly-staging",
+      "vars": {
+        "DEPLOYMENT_ENV": "staging",
+        "ALLOWED_ORIGINS": ""
+      },
+      "d1_databases": [
+        {
+          "binding": "DB",
+          "database_name": "the-assembly-staging",
+          "database_id": "146f2a0e-37da-4105-a8bf-848b940318c6",
+          "migrations_dir": "database/migrations"
+        }
+      ],
+      "ratelimits": [
+        {
+          "name": "API_LIMITER",
+          "namespace_id": "53358792",
+          "simple": {
+            "limit": 120,
+            "period": 60
+          }
+        },
+        {
+          "name": "REGISTER_LIMITER",
+          "namespace_id": "53358793",
+          "simple": {
+            "limit": 5,
+            "period": 60
+          }
+        },
+        {
+          "name": "WRITE_LIMITER",
+          "namespace_id": "53358794",
+          "simple": {
+            "limit": 30,
+            "period": 60
+          }
+        }
+      ]
+    }
+  },
+  "previews": {
+    "vars": {
+      "DEPLOYMENT_ENV": "preview",
+      "ALLOWED_ORIGINS": ""
+    },
+    "d1_databases": [
+      {
+        "binding": "DB",
+        "database_name": "the-assembly-staging",
+        "database_id": "146f2a0e-37da-4105-a8bf-848b940318c6",
+        "migrations_dir": "database/migrations"
+      }
+    ],
+    "ratelimits": [
+      {
+        "name": "API_LIMITER",
+        "namespace_id": "53358792",
+        "simple": {
+          "limit": 120,
+          "period": 60
+        }
+      },
+      {
+        "name": "REGISTER_LIMITER",
+        "namespace_id": "53358793",
+        "simple": {
+          "limit": 5,
+          "period": 60
+        }
+      },
+      {
+        "name": "WRITE_LIMITER",
+        "namespace_id": "53358794",
+        "simple": {
+          "limit": 30,
+          "period": 60
+        }
+      }
+    ]
+  },
+  "observability": {
+    "enabled": true,
+    "logs": {
+      "enabled": true,
+      "head_sampling_rate": 0.05
+    },
+    "traces": {
+      "enabled": true,
+      "head_sampling_rate": 0.01
+    }
+  },
+  "account_id": "c534ce8f6c2a3b0a54ef39a39b4acced"
+}
