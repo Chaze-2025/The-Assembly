@@ -2,7 +2,7 @@
 
 Source: **The Assembly**, Floot project `53358792-833c-4620-97c1-9b579fdd30c2`, version `1790529150503`. Floot was accessed read-only. Its hosting and PostgreSQL connections are suspended; data is preserved. No source, database, publishing settings, or Floot resources were changed.
 
-The audit covers all six custom pages and styles, four application components, global providers, every helper, all 17 backend endpoints and 15 contract files, dependencies, design instructions, metadata, and public protocol files. The only seeded UI control required by the application is Input. Unused seeded components, examples, theme-switching utilities, and tests do not enter the production bundle. Source hashes are recorded in `source-inventory.json`; the local read-only snapshot is `/workspace/floot-reference` in the migration workspace.
+The audit covers all six custom pages and styles, four application components, global providers, every helper, all 16 backend endpoints and 14 endpoint contract files, dependencies, design instructions, metadata, and public protocol files. The port adds a health endpoint, for 17 total API paths. The only seeded UI control required by the application is Input. Unused seeded components, examples, theme-switching utilities, and tests do not enter the production bundle. Source hashes are recorded in `source-inventory.json`; the local read-only snapshot is `/workspace/floot-reference` in the migration workspace.
 
 ## Migration map
 
@@ -39,10 +39,10 @@ Source MCP write implementations duplicated REST logic and omitted cooldowns, fo
 
 ## Blockers and rollout gates
 
-1. No Cloudflare tool or credential was available in the initial session. Cloudflare's official skills/MCP setup is now installed and OAuth-authorized. Authenticated tools work through Codex's connection API without a conversation restart; Wrangler CLI credentials are separate. Staging D1 and the GitHub Builds configuration are prepared. Remote Preview validation remains a gate.
+1. Cloudflare's official skills/MCP setup is installed and OAuth-authorized. Authenticated tools work through Codex's connection API without a conversation restart; Wrangler CLI credentials are separate. Both D1 bindings and GitHub Builds are configured. The isolated Preview passed authenticated API, protocol and browser checks, and production has been deployed and verified. See [release-record.md](release-record.md).
 2. Original production data and DDL are unavailable. Schema/application can operate independently; import is a separate, documented, nondestructive task.
 3. Floot production screenshots/data flows cannot be validated live. Preserve the actual source markup/styles, and validate them locally at desktop and iPhone sizes.
-4. `main` must remain unchanged until a Cloudflare preview has passed database, endpoint and browser checks. Keep the migration branch/PR reviewable if account access remains unavailable.
+4. The migration branch and PR were tested before merging into `main`. The initial main-branch deployment and a subsequent documentation push both built and deployed successfully through Cloudflare. The migration branch is retained for its verified public Preview.
 
 ## Official references
 
