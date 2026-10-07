@@ -2,7 +2,7 @@
 
 ## Resources and configuration
 
-Use Workers Free and D1 Free. This application needs no R2, KV, Durable Objects, Queues, paid database service, or subscription. Cloudflare MCP OAuth succeeded in the migration workspace; Codex must reload to expose the new server's tools. Wrangler CLI authentication is separate. No remote resources or verified deployment URLs have been created by the migration.
+Use Workers Free and D1 Free. This application needs no R2, KV, Durable Objects, Queues, paid database service, or subscription. Cloudflare MCP OAuth succeeded and authenticated tools work through Codex's connection API without restarting the conversation. Wrangler CLI authentication is separate. Staging D1 is provisioned; Preview validation and production release remain pending.
 
 | Setting | Production | Preview / staging |
 | --- | --- | --- |
@@ -19,7 +19,7 @@ Protocol routes run the Worker before static assets so discovery documents get t
 
 ## Account authentication
 
-Cloudflare's official Codex setup is at <https://developers.cloudflare.com/agent-setup/prompt.md>. Its skills and MCP configuration have been installed in the migration workspace. MCP access requires the user's OAuth authorization and an agent restart to load the server. OAuth for MCP and Wrangler CLI credentials are separate mechanisms; do not assume installing the server authenticates Wrangler.
+Cloudflare's official Codex setup is at <https://developers.cloudflare.com/agent-setup/prompt.md>. Its skills and MCP configuration have been installed and OAuth-authorized in the migration workspace. Newly configured tools normally require a Codex reload; the migration can also call them through Codex's connection API. OAuth for MCP and Wrangler CLI credentials are separate mechanisms; do not assume installing the server authenticates Wrangler.
 
 For CLI/CI, an account-scoped API token needs Workers Scripts Edit and D1 Edit. Workers Routes Edit is needed only when configuring routes; Builds administration needs the appropriate Workers Builds/CI permissions. Verify the required operations against [Cloudflare authorization](https://developers.cloudflare.com/workers/authorization/workers/index.md). Set `CLOUDFLARE_API_TOKEN` securely and `CLOUDFLARE_ACCOUNT_ID` for the intended account. Neither is a browser `VITE_*` variable. Do not paste a token into chat or pass it as a shell argument.
 
@@ -67,7 +67,7 @@ Configure the existing connection to **Chaze-2025/The-Assembly**, with repositor
 
 The Cloudflare-generated build token must have D1 migration/execute permissions in addition to Worker deployment. Keep it in Cloudflare Builds settings. The custom provisioning helper additionally needs the account ID, but normal deployment has the account and database IDs in the source configuration after provisioning. Native Previews require current Wrangler; the lockfile pins a supported version (4.148.0 at migration time).
 
-GitHub CI runs type checking, Workerd/D1/import tests, the build, and desktop/iPhone-emulated browser checks. Cloudflare Builds configuration is a remote account setting; documenting it does not mean it has been changed. Confirm the actual settings and a successful build event before claiming `git push` deployment works.
+GitHub CI runs type checking, Workerd/D1/import tests, the build, and desktop/iPhone-emulated browser checks. Cloudflare Builds configuration is a remote account setting. Production and Preview settings were updated and read back through the official Cloudflare MCP, including Node 24 and separate deploy commands. A successful build/deployment event still needs validation before claiming `git push` deployment works.
 
 ## Production release and rollback
 

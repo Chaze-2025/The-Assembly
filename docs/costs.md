@@ -1,6 +1,6 @@
 # Expected cost
 
-Expected **incremental application cost: $0/month** on Cloudflare Free at initial low traffic and within the quotas below. No subscription or paid resource has been enabled. At this revision no authenticated remote resource/deployment has been created, so migration-created recurring charges are $0. The existing account's bill and production traffic cannot be measured without account access; an exact existing account total is not established.
+Expected **incremental application cost: $0/month** on Cloudflare Free at initial low traffic and within the quotas below. No subscription or paid resource has been enabled. Staging D1 has been created using included capacity. Account subscription/billing details are outside the granted MCP scopes, so an exact existing account total is not established. Production traffic and preserved database size are also not yet measurable.
 
 Current official limits/pricing checked on 2026-10-07:
 

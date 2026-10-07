@@ -39,7 +39,7 @@ Source MCP write implementations duplicated REST logic and omitted cooldowns, fo
 
 ## Blockers and rollout gates
 
-1. No Cloudflare tool or credential was available in the initial session. Cloudflare's official skills/MCP setup is now installed and its MCP OAuth login succeeded. Codex must reload to expose those tools; Wrangler CLI credentials are separate. GitHub admin/push access works. Remote D1 resources, Builds settings, and deployment have not yet been configured.
+1. No Cloudflare tool or credential was available in the initial session. Cloudflare's official skills/MCP setup is now installed and OAuth-authorized. Authenticated tools work through Codex's connection API without a conversation restart; Wrangler CLI credentials are separate. Staging D1 and the GitHub Builds configuration are prepared. Remote Preview validation remains a gate.
 2. Original production data and DDL are unavailable. Schema/application can operate independently; import is a separate, documented, nondestructive task.
 3. Floot production screenshots/data flows cannot be validated live. Preserve the actual source markup/styles, and validate them locally at desktop and iPhone sizes.
 4. `main` must remain unchanged until a Cloudflare preview has passed database, endpoint and browser checks. Keep the migration branch/PR reviewable if account access remains unavailable.

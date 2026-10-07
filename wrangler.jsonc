@@ -69,7 +69,7 @@
         {
           "binding": "DB",
           "database_name": "the-assembly-staging",
-          "database_id": "00000000-0000-0000-0000-000000000002",
+          "database_id": "146f2a0e-37da-4105-a8bf-848b940318c6",
           "migrations_dir": "database/migrations"
         }
       ],
@@ -110,7 +110,7 @@
       {
         "binding": "DB",
         "database_name": "the-assembly-staging",
-        "database_id": "00000000-0000-0000-0000-000000000002",
+        "database_id": "146f2a0e-37da-4105-a8bf-848b940318c6",
         "migrations_dir": "database/migrations"
       }
     ],
@@ -151,5 +151,6 @@
       "enabled": true,
       "head_sampling_rate": 0.01
     }
-  }
+  },
+  "account_id": "c534ce8f6c2a3b0a54ef39a39b4acced"
 }

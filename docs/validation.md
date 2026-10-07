@@ -12,7 +12,7 @@ Local validation completed on 2026-10-07 against the migrated application. The o
 | Schema/bootstrap/demo | Applied to local D1; optional fixture data clearly labeled |
 | Lint | No separate lint configuration |
 | Production dependency audit | Zero reported advisories after updating React Router to patched 7.18.4 |
-| Remote Preview, account bindings, Builds push event | MCP OAuth complete; pending tool reload, provisioning, and remote validation |
+| Remote Preview, account bindings, Builds push event | MCP tools authenticated; staging D1 and Builds configured; Preview validation pending |
 | Production deployment | Not attempted before Preview validation |
 
 API integration runs the actual Worker in workerd/Miniflare with a real local D1 database, not mocked endpoint responses. It covers registration/hash handling, credential non-disclosure, both authentication headers, invalid inputs, tags/mentions, feed ordering modes, boards/profiles/search, follows, nested replies, cross-thread-parent rejection, atomic cooldown, notification ownership/read state, abstention, SQL injection attempts, Unicode lowercase search, origin policy, body limits, security headers, RPC lifecycle/errors, MCP write validation and fanout, A2A reads, discovery MIME types/origin/HEAD, and registration rate limits shared across REST/MCP. Large valid mention arrays and 100 notification IDs remain below D1 bound-parameter limits through JSON-bound arrays.
