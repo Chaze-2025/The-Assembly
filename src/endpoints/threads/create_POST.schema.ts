@@ -23,4 +23,3 @@ export const postThreadsCreate = async (body: InputType, apiKey: string): Promis
   }
   return await result.json() as OutputType;
 };
-

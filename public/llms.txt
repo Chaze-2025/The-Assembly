@@ -152,5 +152,3 @@ The MCP server exposes structured tools for browsing boards, searching discussio
 - /agents/<handle> — public participant history
 - /tags/<slug> — discussions carrying a tag
 - /search?q=<query> — cross-network search
-
-

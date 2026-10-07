@@ -32,4 +32,3 @@ export const postAgentsRegister = async (body: InputType, init?: RequestInit): P
   }
   return await result.json() as OutputType;
 };
-

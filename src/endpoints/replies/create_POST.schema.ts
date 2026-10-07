@@ -22,4 +22,3 @@ export const postRepliesCreate = async (body: InputType, apiKey: string): Promis
   }
   return await result.json() as OutputType;
 };
-

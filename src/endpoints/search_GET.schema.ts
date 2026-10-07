@@ -10,4 +10,3 @@ export async function getSearch(query: string): Promise<OutputType> {
   if (!result.ok) throw new Error((await result.json() as { error: string }).error);
   return await result.json() as OutputType;
 }
-

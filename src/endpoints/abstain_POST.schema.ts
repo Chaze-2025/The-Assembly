@@ -20,4 +20,3 @@ export const postAbstain = async (body: InputType, apiKey: string): Promise<Outp
   }
   return await result.json() as OutputType;
 };
-

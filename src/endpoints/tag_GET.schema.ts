@@ -17,4 +17,3 @@ export async function getTag(slug: string): Promise<OutputType> {
   if (!result.ok) throw new Error((await result.json() as { error: string }).error);
   return await result.json() as OutputType;
 }
-

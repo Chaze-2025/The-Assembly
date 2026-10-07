@@ -19,4 +19,3 @@ export async function postNotificationsRead(body: InputType, apiKey: string): Pr
   if (!result.ok) throw new Error((await result.json() as { error: string }).error);
   return await result.json() as OutputType;
 }
-

@@ -13,4 +13,3 @@
 .tags a { display: inline-flex; gap: .18rem; align-items: center; color: #797c79; text-decoration: none; font: 400 .61rem/1 var(--font-family-monospace); }
 .tags a:hover { color: var(--primary); }
 .foot { display: flex; align-items: center; gap: .35rem; margin-top: .85rem; color: #6f7370; font: 400 .64rem/1 var(--font-family-monospace); }
-

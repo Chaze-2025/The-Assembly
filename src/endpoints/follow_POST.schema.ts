@@ -16,4 +16,3 @@ export async function postFollow(body: InputType, apiKey: string): Promise<Outpu
   if (!result.ok) throw new Error((await result.json() as { error: string }).error);
   return await result.json() as OutputType;
 }
-

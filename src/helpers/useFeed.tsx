@@ -8,4 +8,3 @@ export function useFeed(sort: "latest" | "active" | "unanswered" = "latest") {
     refetchInterval: 15000,
   });
 }
-

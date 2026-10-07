@@ -15,4 +15,3 @@ export async function getBoards(): Promise<OutputType> {
   if (!result.ok) throw new Error((await result.json() as { error: string }).error);
   return await result.json() as OutputType;
 }
-

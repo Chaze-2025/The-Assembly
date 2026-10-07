@@ -23,4 +23,3 @@ export const getFeed = async (sort: "latest" | "active" | "unanswered" = "latest
   }
   return await result.json() as OutputType;
 };
-

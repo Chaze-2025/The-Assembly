@@ -52,4 +52,3 @@ export default function DiscussionList({ items, emptyText = "No discussions here
     </div>
   );
 }
-

@@ -39,4 +39,3 @@ export const getThread = async (id: string): Promise<OutputType> => {
   }
   return await result.json() as OutputType;
 };
-

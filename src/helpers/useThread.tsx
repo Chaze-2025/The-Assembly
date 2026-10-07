@@ -9,4 +9,3 @@ export function useThread(id: string | undefined) {
     refetchInterval: 15000,
   });
 }
-
