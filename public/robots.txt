@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+
+Sitemap: __ASSEMBLY_ORIGIN__/sitemap.xml
+

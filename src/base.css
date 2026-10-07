@@ -1,0 +1,109 @@
+
+:root {
+  /* Overlay layers */
+  --z-overlay: 400;
+
+  --z-spotlight: 1000; /* Tutorial spotlights/guided help */
+
+  /* System layers */
+  --z-critical: 2000; /* Critical system notifications */
+
+  /* spacing */
+  --spacing-1: 0.25rem;
+  --spacing-2: 0.5rem;
+  --spacing-3: 0.75rem;
+  --spacing-4: 1rem;
+  --spacing-6: 1.5rem;
+  --spacing-8: 2rem;
+  --spacing-12: 3rem;
+  --spacing-16: 4rem;
+  --spacing-20: 5rem;
+}
+
+:root {
+  --background: #0a0b0c;
+  --foreground: #ece8df;
+  --surface: #101214;
+  --surface-foreground: #ece8df;
+  --sidebar: #0d0f10;
+  --sidebar-foreground: #d8d4cb;
+  --card: #111315;
+  --card-foreground: #ece8df;
+  --popup: #15181a;
+  --popup-foreground: #ece8df;
+  --primary: #d9a441;
+  --primary-foreground: #17130b;
+  --secondary: #1b1e20;
+  --secondary-foreground: #ded9cf;
+  --accent: #d9a441;
+  --accent-foreground: #17130b;
+  --muted: #171a1c;
+  --muted-foreground: #8f918e;
+  --success: #6da47b;
+  --success-foreground: #071109;
+  --error: #c76f65;
+  --error-foreground: #1a0806;
+  --warning: #d9a441;
+  --warning-foreground: #17130b;
+  --info: #8ea8b7;
+  --info-foreground: #071014;
+  --info-hover: #9db6c3;
+  --info-active: #7694a5;
+  --border: #292d30;
+  --font-family-base: 'IBM Plex Sans', system-ui, sans-serif;
+  --font-family-display: 'Newsreader', Georgia, serif;
+  --font-family-monospace: 'IBM Plex Mono', ui-monospace, monospace;
+  --font-family-cursive: 'Newsreader', Georgia, serif;
+  --shadow: 0 1px 0 rgba(255,255,255,0.025);
+  --shadow-md: 0 12px 30px rgba(0,0,0,0.18);
+  --shadow-lg: 0 24px 60px rgba(0,0,0,0.25);
+  --shadow-focus: 0 0 0 3px rgba(217,164,65,0.18);
+  --radius-sm: 0.25rem;
+  --radius: 0.4rem;
+  --radius-md: 0.55rem;
+  --radius-lg: 0.75rem;
+  --radius-full: 9999px;
+  --animation-duration-fast: 120ms;
+  --animation-duration-normal: 220ms;
+  --animation-duration-slow: 420ms;
+  --chart-color-1: #d9a441;
+  --chart-color-2: #8ea8b7;
+  --chart-color-3: #6da47b;
+  --chart-color-4: #a58ab8;
+  --chart-color-5: #c76f65;
+  --signal-dim: rgba(217,164,65,0.12);
+  --rule: rgba(236,232,223,0.08);
+}
+
+.dark {
+  --background: #0a0b0c;
+  --foreground: #ece8df;
+  --surface: #101214;
+  --surface-foreground: #ece8df;
+  --sidebar: #0d0f10;
+  --sidebar-foreground: #d8d4cb;
+  --card: #111315;
+  --card-foreground: #ece8df;
+  --popup: #15181a;
+  --popup-foreground: #ece8df;
+  --primary: #d9a441;
+  --primary-foreground: #17130b;
+  --secondary: #1b1e20;
+  --secondary-foreground: #ded9cf;
+  --accent: #d9a441;
+  --accent-foreground: #17130b;
+  --muted: #171a1c;
+  --muted-foreground: #8f918e;
+  --success: #6da47b;
+  --success-foreground: #071109;
+  --error: #c76f65;
+  --error-foreground: #1a0806;
+  --warning: #d9a441;
+  --warning-foreground: #17130b;
+  --info: #8ea8b7;
+  --info-foreground: #071014;
+  --info-hover: #9db6c3;
+  --info-active: #7694a5;
+  --border: #292d30;
+}
+
