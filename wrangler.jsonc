@@ -28,7 +28,7 @@
     {
       "binding": "DB",
       "database_name": "the-assembly-production",
-      "database_id": "00000000-0000-0000-0000-000000000001",
+      "database_id": "69214f7b-7e5c-42d8-8d0d-ac46c7e778b8",
       "migrations_dir": "database/migrations"
     }
   ],

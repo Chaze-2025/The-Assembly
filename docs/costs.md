@@ -1,6 +1,6 @@
 # Expected cost
 
-Expected **incremental application cost: $0/month** on Cloudflare Free at initial low traffic and within the quotas below. No subscription or paid resource has been enabled. Staging D1 has been created using included capacity. Account subscription/billing details are outside the granted MCP scopes, so an exact existing account total is not established. Production traffic and preserved database size are also not yet measurable.
+Expected **incremental application cost: $0/month** on Cloudflare Free at initial low traffic and within the quotas below. No subscription or paid resource has been enabled. Separate staging and production D1 databases have been created using included capacity. The staging verification database is approximately 180 KiB. Account subscription/billing details are outside the granted MCP scopes, so an exact existing account total is not established. Production traffic and preserved database size are also not yet measurable.
 
 Current official limits/pricing checked on 2026-10-07:
 

@@ -2,7 +2,9 @@
 
 ## Resources and configuration
 
-Use Workers Free and D1 Free. This application needs no R2, KV, Durable Objects, Queues, paid database service, or subscription. Cloudflare MCP OAuth succeeded and authenticated tools work through Codex's connection API without restarting the conversation. Wrangler CLI authentication is separate. Staging D1 is provisioned; Preview validation and production release remain pending.
+Use Workers Free and D1 Free. This application needs no R2, KV, Durable Objects, Queues, paid database service, or subscription. Cloudflare MCP OAuth succeeded and authenticated tools work through Codex's connection API without restarting the conversation. Wrangler CLI authentication is separate. Both D1 databases are provisioned; Preview validation passed and production release is prepared. Existing subscription details are outside the granted account permissions; no plan or billing changes were made.
+
+Configured account: `c534ce8f6c2a3b0a54ef39a39b4acced`. Production D1: `69214f7b-7e5c-42d8-8d0d-ac46c7e778b8`; staging D1: `146f2a0e-37da-4105-a8bf-848b940318c6`. The source bindings point to separate databases. The verified native Preview is <https://cloudflare-migration-the-assembly.wj7djnw2j2.workers.dev>.
 
 | Setting | Production | Preview / staging |
 | --- | --- | --- |
@@ -65,9 +67,11 @@ Configure the existing connection to **Chaze-2025/The-Assembly**, with repositor
 
 `npm run deploy` deliberately applies pending remote migrations and idempotent bootstrap before its own build and `wrangler deploy`. The repeated build makes direct CLI deployment safe and selects the correct environment; it is small enough to stay within the free build allowance. There is no Pages output-directory setting: the official Vite plugin connects the generated static asset directory and Worker entry point.
 
-The Cloudflare-generated build token must have D1 migration/execute permissions in addition to Worker deployment. Keep it in Cloudflare Builds settings. The custom provisioning helper additionally needs the account ID, but normal deployment has the account and database IDs in the source configuration after provisioning. Native Previews require current Wrangler; the lockfile pins a supported version (4.148.0 at migration time).
+The Cloudflare-generated build token must have D1 migration/execute permissions in addition to Worker deployment. Keep it in Cloudflare Builds settings. The existing managed token successfully applied staging migrations/bootstrap and uploaded the Worker/assets; no extra token was created. The custom provisioning helper additionally needs the account ID, but normal deployment has the account and database IDs in the source configuration after provisioning. Native Previews require current Wrangler; the lockfile pins a supported version (4.148.0 at migration time).
 
-GitHub CI runs type checking, Workerd/D1/import tests, the build, and desktop/iPhone-emulated browser checks. Cloudflare Builds configuration is a remote account setting. Production and Preview settings were updated and read back through the official Cloudflare MCP, including Node 24 and separate deploy commands. A successful build/deployment event still needs validation before claiming `git push` deployment works.
+GitHub CI runs type checking, Workerd/D1/import tests, the build, and desktop/iPhone-emulated browser checks. Cloudflare Builds configuration is a remote account setting. Production and Preview settings were updated and read back through the official Cloudflare MCP, including Node 24 and separate deploy commands. Preview build `7662cd42-c07c-451f-acb8-5cdcccf149ee` successfully deployed a GitHub push; live API and browser verification passed afterward.
+
+Native Preview URLs also require Preview access enabled on the parent Worker. This was enabled through the Cloudflare API with `{ "enabled": false, "previews_enabled": true }`, preserving disabled production access until release. Normal production deployment applies source `workers_dev: true` and `preview_urls: true`. If an upload succeeds but the URL returns Cloudflare error 1042, check parent subdomain/Preview access before treating it as an application error.
 
 ## Production release and rollback
 
