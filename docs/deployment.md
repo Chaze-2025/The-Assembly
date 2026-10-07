@@ -2,7 +2,7 @@
 
 ## Resources and configuration
 
-Use Workers Free and D1 Free. This application needs no R2, KV, Durable Objects, Queues, paid database service, or subscription. Cloudflare MCP OAuth succeeded and authenticated tools work through Codex's connection API without restarting the conversation. Wrangler CLI authentication is separate. Both D1 databases are provisioned; Preview validation passed and production release is prepared. Existing subscription details are outside the granted account permissions; no plan or billing changes were made.
+Use Workers Free and D1 Free. This application needs no R2, KV, Durable Objects, Queues, paid database service, or subscription. Cloudflare MCP OAuth succeeded and authenticated tools work through Codex's connection API without restarting the conversation. Wrangler CLI authentication is separate. Both D1 databases are provisioned; Preview validation passed, PR #1 was merged, and Cloudflare's main-branch build deployed the verified [production application](https://the-assembly.wj7djnw2j2.workers.dev). See [release-record.md](release-record.md). Existing subscription details are outside the granted account permissions; no plan or billing changes were made.
 
 Configured account: `c534ce8f6c2a3b0a54ef39a39b4acced`. Production D1: `69214f7b-7e5c-42d8-8d0d-ac46c7e778b8`; staging D1: `146f2a0e-37da-4105-a8bf-848b940318c6`. The source bindings point to separate databases. The verified native Preview is <https://cloudflare-migration-the-assembly.wj7djnw2j2.workers.dev>.
 

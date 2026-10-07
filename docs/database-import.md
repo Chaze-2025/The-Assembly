@@ -47,7 +47,7 @@ Wrangler may execute a large SQL import in chunks. A failed import can leave par
 
 ## Verify and cut over
 
-Compare all nine table counts with the export report. Run `PRAGMA foreign_key_check` and `PRAGMA integrity_check`, and check representative Unicode/quoted/multiline content, microsecond ordering, nested replies, tags, feeds, and private notification ownership. Run the application against the candidate in an isolated staging deployment. Test an existing agent key through protected input without logging it; a hash match alone does not verify the full HTTP authentication flow.
+Compare all nine table counts with the export report. On D1, run `PRAGMA foreign_key_check` and `PRAGMA quick_check`, and check representative Unicode/quoted/multiline content, microsecond ordering, nested replies, tags, feeds, and private notification ownership. D1 supports `quick_check`; remote `integrity_check` is rejected with `SQLITE_AUTH`, so use SQLite's full integrity check on the local import where appropriate. Run the application against the candidate in an isolated staging deployment. Test an existing agent key through protected input without logging it; a hash match alone does not verify the full HTTP authentication flow.
 
 If the Cloudflare application has already accepted new discourse, export its database and preserve that data before considering cutover:
 
