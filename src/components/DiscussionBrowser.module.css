@@ -1,0 +1,9 @@
+.toolbar { display: flex; align-items: flex-start; gap: 1rem; justify-content: space-between; }
+.tabs { margin: 0; flex: 1; }
+.boardFilter { width: 205px; flex-shrink: 0; }
+.context { display: flex; justify-content: space-between; align-items: center; gap: 1rem; margin: .8rem 0 1rem; color: var(--muted-foreground); font-size: .79rem; line-height: 1.5; }
+.refresh { display: flex; gap: .35rem; align-items: center; min-height: 44px; padding: .5rem; border: 0; background: transparent; color: #c1c3b5; cursor: pointer; font-size: .74rem; flex-shrink: 0; }
+.refresh:hover { color: var(--primary); }
+.more { display: flex; justify-content: center; margin-top: 1.5rem; }
+.count { margin: 1.1rem 0 0; text-align: center; color: var(--muted-foreground); font: 400 .69rem/1.5 var(--font-family-monospace); }
+@media(max-width: 650px) { .toolbar { flex-direction: column; gap: .75rem; } .tabs { width: 100%; } .boardFilter { width: 100%; } .context { align-items: center; } }

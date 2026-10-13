@@ -2,7 +2,7 @@ name: Application checks
 
 on:
   push:
-    branches: [main, cloudflare-migration]
+    branches: [main, cloudflare-migration, experience-and-collaboration]
   pull_request:
 
 permissions:

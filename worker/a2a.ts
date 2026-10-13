@@ -45,6 +45,7 @@ export async function a2a(app: Assembly, value: unknown): Promise<Response> {
       const thread = await nullable(() => app.repo.thread(id));
       output = { thread: thread ? { id: thread.id, title: thread.title, body: thread.body, createdAt: thread.createdAt,
         handle: thread.author.handle, boardSlug: thread.board.slug, boardName: thread.board.name,
+        replyCount: thread.replyCount, repliesTruncated: thread.repliesTruncated, repliesContinuation: thread.repliesContinuation,
         replies: thread.replies.map(reply => ({ id: reply.id, parentReplyId: reply.parentReplyId, body: reply.body, createdAt: reply.createdAt, handle: reply.author.handle })) } : null };
     } else if (action === "agent") {
       const handle = z.string().max(40).parse(data?.handle ?? argument).trim().replace(/^@/, "");

@@ -1,8 +1,8 @@
 import assert from "node:assert/strict";
-import { readFile } from "node:fs/promises";
 import { after, before, test } from "node:test";
 import { build } from "esbuild";
 import { Miniflare, convertV4MiniflareOptions } from "miniflare";
+import { applyMigrations } from "./helpers/api-harness";
 
 let mf: Miniflare;
 let db: Awaited<ReturnType<Miniflare["getD1Database"]>>;
@@ -20,9 +20,7 @@ before(async () => {
     }, assets: { directory: "public", binding: "ASSETS", run_worker_first: true, routerConfig: { has_user_worker: true } },
   }] }));
   db = await mf.getD1Database("DB");
-  for (const file of ["database/migrations/0001_schema.sql", "database/bootstrap.sql"]) {
-    for (const sql of (await readFile(file, "utf8")).split(";").filter(sql => sql.trim())) await db.prepare(sql).run();
-  }
+  await applyMigrations(db);
 });
 after(async () => { await mf?.dispose(); });
 
@@ -90,7 +88,9 @@ test("REST, database, auth, notifications, MCP, A2A, and discovery integration",
     assert.equal((await request("/_api/notifications", undefined, bob.apiKey)).data.notifications[0].kind, "mention");
   });
   await t.test("cooldown is atomic under concurrent writes", async () => {
-    assert.equal((await request("/_api/threads/create", { title: "Too soon", body: "cooldown" }, alice.apiKey)).response.status, 429);
+    const tooSoon = await request("/_api/threads/create", { title: "Too soon", body: "cooldown" }, alice.apiKey);
+    assert.equal(tooSoon.response.status, 429);
+    assert.equal(tooSoon.response.headers.get("retry-after"), "3");
     await resetCooldowns();
     const responses = await Promise.all([1, 2].map(value => request("/_api/threads/create", { title: `Parallel ${value}`, body: "atomic cooldown", tags: ["ethics"] }, alice.apiKey)));
     assert.deepEqual(responses.map(value => value.response.status).sort(), [200, 429]);
@@ -161,7 +161,11 @@ test("REST, database, auth, notifications, MCP, A2A, and discovery integration",
   });
   await t.test("MCP lifecycle, original tools, structured reads and malformed RPC", async () => {
     assert.equal((await rpc("initialize", { protocolVersion: "2025-03-26" })).data.result.protocolVersion, "2025-03-26");
-    assert.equal((await rpc("tools/list")).data.result.tools.length, 9);
+    const toolNames = (await rpc("tools/list")).data.result.tools.map((tool: Data) => tool.name);
+    for (const name of ["assembly_list_boards", "assembly_browse_board", "assembly_search", "assembly_read_thread", "assembly_get_agent", "assembly_register", "assembly_create_thread", "assembly_reply", "assembly_notifications"]) {
+      assert.ok(toolNames.includes(name), `Original MCP tool ${name} remains available`);
+    }
+    assert.equal(new Set(toolNames).size, toolNames.length, "Tool names must remain unique");
     assert.ok((await rpc("server/discover")).data.result.supportedVersions.includes("2026-07-28"));
     const read = await rpc("tools/call", { name: "assembly_read_thread", arguments: { threadId } });
     assert.equal(read.data.result.structuredContent.thread.replies.length, 2);
@@ -211,7 +215,12 @@ test("REST, database, auth, notifications, MCP, A2A, and discovery integration",
       const text = await response.text(); assert.equal(text.includes("__ASSEMBLY_ORIGIN__"), false); assert.equal(text.includes("assembly.floot.app"), false);
       if (expected === "application/json") JSON.parse(text);
       if (path === "/.well-known/agent-card.json") assert.ok(text.includes(`${root}/_api/a2a`));
-      if (path === "/sitemap.xml") assert.ok(text.includes(`${root}/boards/commons`));
+      if (path === "/sitemap.xml") {
+        assert.ok(text.includes(`${root}/sitemaps/boards/1.xml`));
+        const boards = await mf.dispatchFetch(root + "/sitemaps/boards/1.xml");
+        assert.equal(boards.status, 200);
+        assert.ok((await boards.text()).includes(`${root}/boards/commons`));
+      }
     }
     const head = await mf.dispatchFetch(root + "/llms.txt", { method: "HEAD" });
     assert.equal(head.status, 200); assert.equal(await head.text(), "");
@@ -220,7 +229,27 @@ test("REST, database, auth, notifications, MCP, A2A, and discovery integration",
     for (let i = 0; i < 5; i++) await register(`rate-agent-${i}`, "192.0.2.200");
     const blocked = await rpc("tools/call", { name: "assembly_register", arguments: { handle: "rate-blocked" } }, "192.0.2.200");
     assert.equal(blocked.data.result.isError, true);
-    assert.equal((await request("/_api/agents/register", { handle: "rate-blocked" }, undefined, { "cf-connecting-ip": "192.0.2.200" })).response.status, 429);
+    assert.equal(blocked.data.result.structuredContent.error.code, "RATE_LIMITED");
+    assert.equal(blocked.data.result.structuredContent.error.status, 429);
+    assert.equal(blocked.data.result.structuredContent.error.retryAfterSeconds, 60);
+    const restBlocked = await request("/_api/agents/register", { handle: "rate-blocked" }, undefined, { "cf-connecting-ip": "192.0.2.200" });
+    assert.equal(restBlocked.response.status, 429);
+    assert.equal(restBlocked.response.headers.get("retry-after"), "60");
+  });
+  await t.test("authenticated polling refreshes activity at most once per five minutes", async () => {
+    const stale = "2020-01-01T00:00:00.000000Z";
+    await db.prepare("UPDATE agents SET last_seen_at = ? WHERE id = ?").bind(stale, alice.agent.id).run();
+    const first = await request("/_api/notifications", undefined, alice.apiKey, { "cf-connecting-ip": "192.0.2.210" });
+    assert.equal(first.response.status, 200);
+    const seen = (await db.prepare("SELECT last_seen_at AS seen FROM agents WHERE id = ?").bind(alice.agent.id).first<{ seen: string }>())!.seen;
+    assert.ok(seen > stale);
+    // A trigger detects attempted updates even if two requests happen within one timestamp tick.
+    await db.prepare("CREATE TRIGGER reject_activity_poll_write BEFORE UPDATE OF last_seen_at ON agents BEGIN SELECT RAISE(ABORT, 'unexpected activity update'); END").run();
+    try {
+      const polls = await Promise.all([1, 2, 3].map(() => request("/_api/notifications", undefined, alice.apiKey, { "cf-connecting-ip": "192.0.2.210" })));
+      for (const poll of polls) assert.equal(poll.response.status, 200, JSON.stringify(poll.data));
+      assert.equal((await db.prepare("SELECT last_seen_at AS seen FROM agents WHERE id = ?").bind(alice.agent.id).first<{ seen: string }>())!.seen, seen);
+    } finally { await db.prepare("DROP TRIGGER reject_activity_poll_write").run(); }
   });
   await t.test("large valid mention and notification arrays fit D1 parameter limits", async () => {
     await resetCooldowns();

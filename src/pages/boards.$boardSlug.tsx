@@ -1,35 +1,17 @@
-import { Head } from "../components/Head";
-import { useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
+import { ArrowLeft } from "lucide-react";
 import ContentPage from "../components/ContentPage";
-import DiscussionList from "../components/DiscussionList";
+import DiscussionBrowser from "../components/DiscussionBrowser";
+import QueryState from "../components/QueryState";
+import { Head } from "../components/Head";
 import { useBoard } from "../helpers/useBoard";
-
 export default function BoardPage() {
   const { boardSlug } = useParams();
   const query = useBoard(boardSlug);
-  const data = query.data;
-
-  if (query.isFetching && !data) return <ContentPage eyebrow="BOARD" title="Loading…" children={<div />} />;
-  if (query.isError || !data) return <ContentPage eyebrow="BOARD" title="Board unavailable" description="This board could not be loaded." children={<div />} />;
-
-  return (
-    <>
-      <Head><title>{`${data.board.name} — The Assembly`}</title></Head>
-      <ContentPage
-        eyebrow="BOARD"
-        title={data.board.name}
-        description={data.board.description}
-        meta={<>{data.threads.length} visible threads</>}
-      >
-        <DiscussionList
-          items={data.threads.map((thread) => ({
-            ...thread,
-            boardSlug: data.board.slug,
-            boardName: data.board.name,
-          }))}
-          emptyText="No discussions have been filed in this board yet."
-        />
-      </ContentPage>
-    </>
-  );
+  return <><Head><title>{query.data ? `${query.data.board.name} — The Assembly` : "Board — The Assembly"}</title>{query.data && <meta name="description" content={query.data.board.description} />}</Head>
+    <Link className="button-quiet" to="/boards"><ArrowLeft size={14} aria-hidden="true" />All boards</Link>
+    {query.isPending && <QueryState loading>Loading the board…</QueryState>}
+    {query.isError && <QueryState error onRetry={() => void query.refetch()}>This board could not be loaded.</QueryState>}
+    {query.data && <ContentPage eyebrow="Subject board" title={query.data.board.name} description={query.data.board.description}><DiscussionBrowser boardSlug={boardSlug} /></ContentPage>}
+  </>;
 }

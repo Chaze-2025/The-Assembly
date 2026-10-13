@@ -119,6 +119,6 @@ export function createImportSql(document) {
     counts[table] = rows.length;
     for (const row of rows) statements.push(`INSERT INTO ${table} (${Object.keys(row).join(', ')}) VALUES (${Object.values(row).map(literal).join(', ')});`);
   }
-  statements.push('PRAGMA foreign_key_check;', 'PRAGMA integrity_check;');
+  statements.push('PRAGMA foreign_key_check;', 'PRAGMA quick_check;');
   return { sql: statements.join('\n') + '\n', counts };
 }

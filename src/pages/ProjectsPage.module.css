@@ -1,0 +1,59 @@
+.intro { display: flex; align-items: baseline; justify-content: space-between; gap: 1.5rem; margin-bottom: 2rem; }
+.intro p { margin: 0; color: var(--muted-foreground); max-width: 42rem; line-height: 1.65; font-size: .94rem; }
+.intro > a, .agentNote > a { display: inline-flex; align-items: center; gap: .6rem; flex-shrink: 0; text-decoration: none; font-size: .85rem; }
+.toolbar { display: flex; align-items: end; justify-content: space-between; gap: 1.4rem; padding-bottom: 1.5rem; border-bottom: 1px solid var(--border); }
+.search { width: 100%; max-width: 28rem; min-width: 0; }
+.searchLabel { display: block; margin-bottom: .6rem; color: var(--muted-foreground); font: 400 .7rem/1.4 var(--font-family-monospace); }
+.searchField { display: flex; align-items: center; gap: .7rem; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding-left: .85rem; }
+.searchField > svg { flex-shrink: 0; color: var(--muted-foreground); }
+.searchField input { min-width: 0; width: 100%; border: 0; padding: .8rem 0; color: var(--foreground); background: transparent; outline-offset: 0; font: 400 .9rem/1.4 var(--font-family-base); }
+.searchField input::placeholder { color: var(--muted-foreground); }
+.searchField button { color: var(--foreground); border: 0; border-left: 1px solid var(--border); background: transparent; padding: .8rem .9rem; min-height: 44px; cursor: pointer; font-size: .8rem; }
+.searchField button:hover { color: var(--primary); background: var(--signal-dim); }
+.filters { display: flex; flex-wrap: wrap; gap: .25rem; }
+.filters a { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; border-radius: var(--radius-sm); padding: .65rem .8rem; color: var(--muted-foreground); text-decoration: none; font-size: .8rem; white-space: nowrap; }
+.filters a:hover, .filters .active { color: var(--foreground); background: var(--secondary); }
+.filters .active { box-shadow: inset 0 -2px var(--primary); }
+.resultsHeading { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; margin: 1.8rem 0 .5rem; }
+.resultsHeading h2 { margin: 0; color: var(--muted-foreground); font: 400 .75rem/1.7 var(--font-family-monospace); overflow-wrap: anywhere; }
+.resultsHeading > a { flex-shrink: 0; font-size: .8rem; text-underline-offset: .2em; }
+.projectList { border-bottom: 1px solid var(--border); }
+.project { display: grid; grid-template-columns: minmax(0, 1fr) 205px; align-items: center; column-gap: 3rem; padding: 2rem 0; border-top: 1px solid var(--rule); }
+.projectMain { min-width: 0; }
+.metadata { display: flex; align-items: center; flex-wrap: wrap; gap: .9rem; color: var(--muted-foreground); font: 400 .68rem/1.5 var(--font-family-monospace); }
+.metadata a { color: var(--muted-foreground); text-decoration: none; }
+.metadata a:hover { color: var(--primary); }
+.status { display: inline-flex; align-items: center; gap: .4rem; color: var(--foreground); }
+.status::before { content: ""; width: 5px; height: 5px; border-radius: 50%; background: var(--muted-foreground); }
+.status[data-status="active"]::before { background: var(--primary); }
+.status[data-status="completed"]::before { background: var(--success); }
+.project h3 { margin: .85rem 0 .7rem; font: 400 clamp(1.6rem, 2.9vw, 2.2rem)/1.18 var(--font-family-display); letter-spacing: -.02em; }
+.project h3 a { color: var(--foreground); text-decoration: none; }
+.project h3 a:hover { color: var(--primary); }
+.project h3 svg { margin-left: .7rem; vertical-align: middle; color: var(--muted-foreground); }
+.summary { margin: 0; color: #bbbcb4; font-size: .93rem; line-height: 1.7; max-width: 50rem; }
+.projectFoot { display: flex; flex-wrap: wrap; gap: .4rem 1.1rem; color: var(--muted-foreground); margin-top: 1.1rem; font: 400 .65rem/1.7 var(--font-family-monospace); }
+.projectProgress { border-left: 1px solid var(--border); padding-left: 1.5rem; min-width: 0; }
+.progressLabel { display: flex; flex-direction: column; gap: .4rem; }
+.progressLabel > span { color: var(--muted-foreground); font: 400 .65rem/1.5 var(--font-family-monospace); }
+.progressLabel strong { color: var(--foreground); font: 400 1.55rem/1.4 var(--font-family-display); }
+.progressLabel strong span { color: var(--muted-foreground); }
+.projectProgress progress { display: block; width: 100%; height: 3px; border: 0; border-radius: 0; background: var(--border); margin: .75rem 0 1rem; accent-color: var(--primary); }
+.projectProgress progress::-webkit-progress-bar { background: var(--border); }
+.projectProgress progress::-webkit-progress-value { background: var(--primary); }
+.projectProgress progress::-moz-progress-bar { background: var(--primary); }
+.projectProgress > a { display: inline-flex; align-items: center; gap: .5rem; color: var(--muted-foreground); text-decoration: none; font-size: .76rem; line-height: 1.6; }
+.projectProgress > a:hover { color: var(--primary); }
+.projectProgress > a svg { flex-shrink: 0; }
+.pagination { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: .75rem; padding: 1.5rem 0; }
+.pageNote { color: var(--muted-foreground); font: 400 .65rem/1.6 var(--font-family-monospace); }
+.empty { padding: clamp(2rem, 5vw, 4.5rem) clamp(1.1rem, 3vw, 3rem); background: var(--surface); border: 1px solid var(--border); margin-top: 1.2rem; }
+.empty h3 { font: 400 clamp(1.8rem, 3vw, 2.6rem)/1.2 var(--font-family-display); margin: .9rem 0; max-width: 30rem; }
+.empty p { color: var(--muted-foreground); max-width: 38rem; font-size: .93rem; line-height: 1.8; margin: 0 0 1.5rem; }
+.stateActions { display: flex; flex-wrap: wrap; gap: .75rem; justify-content: center; }
+.agentNote { margin-top: 3rem; display: flex; align-items: center; justify-content: space-between; gap: 2rem; border-top: 1px solid var(--border); padding-top: 2rem; }
+.agentNote h2 { font: 400 1.55rem/1.25 var(--font-family-display); margin: .5rem 0; }
+.agentNote p { color: var(--muted-foreground); font-size: .88rem; line-height: 1.7; max-width: 39rem; margin: 0; }
+@media (max-width: 980px) { .toolbar { align-items: stretch; flex-direction: column; gap: .8rem; } .search { max-width: 100%; } .filters { margin-left: -.8rem; } .project { column-gap: 1.5rem; } }
+@media (max-width: 700px) { .intro { flex-direction: column; gap: .8rem; } .project { grid-template-columns: minmax(0, 1fr); gap: 1.5rem; } .projectProgress { border-left: 0; padding-left: 0; max-width: 100%; display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 0 1.5rem; } .progressLabel { flex-direction: row; align-items: baseline; justify-content: space-between; } .progressLabel strong { font-size: 1.2rem; } .projectProgress progress { grid-column: 1; margin: .45rem 0 0; } .projectProgress > a { grid-column: 2; grid-row: 1 / 3; max-width: 10rem; } .agentNote { flex-direction: column; align-items: start; gap: 1rem; } .project h3 { font-size: 1.85rem; } }
+@media (max-width: 390px) { .filters { gap: 0; } .filters a { padding-inline: .6rem; font-size: .75rem; } .searchField { padding-left: .55rem; gap: .4rem; } .searchField button { padding-inline: .65rem; } .projectProgress { gap: 0 1rem; } .projectProgress > a { max-width: 7rem; } }

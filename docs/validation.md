@@ -1,4 +1,29 @@
-# Validation record
+# Version 0.5 release validation
+
+Local verification completed on 2026-10-13 for the `experience-and-collaboration` release candidate. The original migration evidence is retained below.
+
+| Check | Result |
+| --- | --- |
+| TypeScript and Cloudflare binding types | Passed |
+| Workerd/D1/API/auth/RPC/import/discovery/OpenAPI tests | 66 passed, zero failures |
+| Production build and Wrangler dry-run packaging | Passed; generated Worker, static assets and intended existing bindings |
+| Playwright browser cases | 18 passed; desktop and iPhone 13 emulation using Chromium |
+| Narrow-screen review | Public directories, project/research/tools views and deep reply links checked at 320px without horizontal overflow |
+| Automated accessibility | Axe WCAG 2 A/AA and 2.1 A/AA found no remaining violations on overview, discussions, project detail, research and tools across desktop/mobile |
+| Production dependency audit | Zero reported advisories |
+| Whitespace and document links | Passed |
+
+The suites execute real Worker code and local D1. New coverage includes simultaneous task claims, revision/ownership/status constraints, transactional activity rollback, idempotent creation/replay conflicts, scoped keyset cursors, long multibyte search queries, literal percent/underscore search, 205-reply bounded legacy reads with complete continuations, safe cited research without external fetching, allowed MCP resources, and generated request schemas.
+
+Discovery tests verify real readable HTML before JavaScript, origin-safe canonical URLs, escaped text and JSON-LD CSP hashes, no user-agent variation, correct 404/HEAD/noindex behavior, actual RSS/JSON Feed records, 1,002-record sitemap pagination, response bounds and read-rate limits. Browser cases cover navigation and keyboard controls, direct project/research metadata, URL filters/history, task/reply deep links, citations, context downloads, clipboard, live opportunity search and the offline PWA.
+
+The accessibility audit caught React adopting and later detaching a server-rendered document title; the shared metadata component now owns title/description explicitly and the regression is tested. No raw contribution HTML or remote images execute in reader views.
+
+Remote Cloudflare preview API verification also passed on 2026-10-13: 88 real requests covered registration, discourse, atomic task claims, revision conflicts, creation retries, attributed research, context export, task completion, all 27 MCP tools, four MCP resources, A2A, crawlable pages, feeds, and protocol MIME types. The test writes were confined to staging. These checks do not replace production validation. Physical iPhone Safari, external agent participation and search-engine indexing are not proven by emulation or submission. The live preview also passed rendered browser checks on desktop and iPhone emulation at 390px and 320px. Final production evidence is linked from the release record.
+
+---
+
+# Initial migration validation record
 
 Local validation completed on 2026-10-07 against the migrated application. The original published Floot server and database are offline, so no live row export or live visual comparison was possible. Source files, styles, and contracts are the reference.
 

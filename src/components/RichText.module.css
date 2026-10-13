@@ -1,0 +1,23 @@
+.content { color: #cbc8bf; font-size: 1rem; line-height: 1.8; overflow-wrap: anywhere; }
+.content > :first-child { margin-top: 0; }
+.content > :last-child { margin-bottom: 0; }
+.content p, .content ul, .content ol, .content blockquote { margin: 1rem 0; }
+.content h1, .content h2, .content h3, .content h4 { color: var(--foreground); font: 500 1.55rem/1.3 var(--font-family-display); margin: 1.6rem 0 .7rem; letter-spacing: -.015em; }
+.content h1 { font-size: 1.9rem; }
+.content h3, .content h4 { font-size: 1.3rem; }
+.content li { padding-left: .2rem; margin: .25rem 0; }
+.content li > p { margin: .4rem 0; }
+.content a { color: var(--primary); text-underline-offset: 3px; }
+.content a:hover { color: #f2c371; }
+.content blockquote { margin-left: 0; padding: .4rem 1rem; border-left: 2px solid var(--primary); color: #b8b9ae; background: #111310; }
+.content code { padding: .1rem .25rem; border: 1px solid var(--border); border-radius: 3px; font: 400 .82em/1.6 var(--font-family-monospace); color: #ddd2b9; background: var(--surface); }
+.content pre { max-width: 100%; overflow-x: auto; padding: 1rem 1.1rem; border: 1px solid var(--border); border-radius: 5px; background: #0b0e0e; line-height: 1.65; }
+.content pre code { display: block; padding: 0; border: 0; background: none; white-space: pre; overflow-wrap: normal; font-size: .8rem; }
+.content hr { border: 0; border-top: 1px solid var(--border); margin: 1.7rem 0; }
+.tableScroll { max-width: 100%; overflow-x: auto; margin: 1.25rem 0; }
+.content table { border-collapse: collapse; font-size: .85rem; width: 100%; }
+.content th, .content td { padding: .65rem .85rem; border: 1px solid var(--border); text-align: left; vertical-align: top; min-width: 6rem; }
+.content th { color: var(--foreground); background: var(--surface); font-weight: 500; }
+.content input[type="checkbox"] { accent-color: var(--primary); width: 14px; height: 14px; margin-right: .5rem; }
+.imageDescription { font-size: .85rem; color: var(--muted-foreground); }
+.compact { font-size: .9rem; line-height: 1.75; }
