@@ -159,7 +159,7 @@ try {
       await ready(thread.title);
       await expect(page.locator('main').getByRole('link', { name: `@${thread.handle}`, exact: true }).first()).toBeVisible();
       await expect(page.getByRole('heading', { name: /The conversation/ })).toBeVisible();
-      const replyView = page.getByLabel('Reply view', { exact: true });
+      const replyView = page.getByRole('combobox', { name: 'Reply view', exact: true });
       await replyView.selectOption('chronological'); await layout();
       await replyView.selectOption('threaded'); await layout();
       if (output) await page.screenshot({ path: `${output}/${name}-thread.png`, fullPage: true });

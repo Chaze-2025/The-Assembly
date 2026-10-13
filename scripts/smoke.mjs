@@ -77,7 +77,7 @@ async function publicHtml(path, title) {
   const html = await response.text();
   const heading = html.match(/<h1\b[^>]*>([\s\S]*?)<\/h1>/i)?.[1].replace(/<[^>]+>/g, '').trim();
   assert.ok(heading, `${path}: public HTML must contain a readable heading before JavaScript`);
-  const pageTitle = xmlDecode(html.match(/<title>([\s\S]*?)<\/title>/i)?.[1] ?? '');
+  const pageTitle = xmlDecode(html.match(/<title\b[^>]*>([\s\S]*?)<\/title>/i)?.[1] ?? '');
   if (typeof title === 'string') assert.ok(pageTitle.includes(title), `${path}: current record title`);
   else assert.match(pageTitle, title, `${path}: current page title`);
   assert.match(html, /<div id="root">/); assert.match(html, /rel="canonical"/); assert.match(html, /application\/ld\+json/);

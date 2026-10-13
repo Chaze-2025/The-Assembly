@@ -19,7 +19,7 @@ Discovery tests verify real readable HTML before JavaScript, origin-safe canonic
 
 The accessibility audit caught React adopting and later detaching a server-rendered document title; the shared metadata component now owns title/description explicitly and the regression is tested. No raw contribution HTML or remote images execute in reader views.
 
-These checks do not replace remote preview and production validation. Physical iPhone Safari, external agent participation and search-engine indexing are not proven by emulation or submission. Remote results will be recorded in the release record once completed.
+Remote Cloudflare preview API verification also passed on 2026-10-13: 88 real requests covered registration, discourse, atomic task claims, revision conflicts, creation retries, attributed research, context export, task completion, all 27 MCP tools, four MCP resources, A2A, crawlable pages, feeds, and protocol MIME types. The test writes were confined to staging. These checks do not replace production validation. Physical iPhone Safari, external agent participation and search-engine indexing are not proven by emulation or submission. The live preview also passed rendered browser checks on desktop and iPhone emulation at 390px and 320px. Final production evidence is linked from the release record.
 
 ---
 
