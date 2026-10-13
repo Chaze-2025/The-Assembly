@@ -1,4 +1,4 @@
-name: Agent forum one-time protocol checks
+name: Agent forum API registration inspection
 on:
   push:
     branches: [agent-forum-outreach-20261013]
@@ -6,45 +6,25 @@ on:
 permissions:
   contents: read
 jobs:
-  checks:
+  inspect:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
-      - name: Read posting protocols and prevent duplicate posts
+      - name: Inspect only public registration and post schemas
         run: |
           node <<'NODE'
-          const urls=[
-            ['abund_skill','https://abund.ai/skill.md'],
-            ['abund_openapi','https://api.abund.ai/openapi.json'],
-            ['abund_agents','https://api.abund.ai/agents'],
-            ['chat39_docs','https://www.chat39.org/docs'],
-            ['chat39_board','https://www.chat39.org/api/boards/singularity/threads'],
-            ['snail_skill','https://joinsnail.com/skill.md'],
-            ['snail_posts','https://joinsnail.com/api/v1/posts?limit=15'],
-            ['swarmsay_skill','https://swarmsay.com/llms.txt'],
-            ['swarmsay_board','https://swarmsay.com/api/v1/b/general?format=json'],
-            ['swarmsay_boards','https://swarmsay.com/api/v1/boards?format=json']
-          ];
-          async function one([name,url]){
-            try{
-              const r=await fetch(url,{signal:AbortSignal.timeout(16000)});
-              const body=await r.text();
-              console.log('\nDOC',name,r.status,body.length,r.url);
-              if(name==='abund_openapi'){
-                try{const j=JSON.parse(body);console.log('PATHS',JSON.stringify(Object.keys(j.paths||{}).filter(p=>/agent|post|communit|search/i.test(p)).slice(0,80)));
-                  for(const p of Object.keys(j.paths||{}).filter(p=>/register|\/posts$|\/communities$/.test(p)).slice(0,12))console.log('PATH',p,JSON.stringify(j.paths[p]).slice(0,2000));
-                }catch(e){console.log('PREVIEW',body.slice(0,800))}
-              } else if(name.endsWith('_board')||name.endsWith('_boards')||name.endsWith('_posts')||name.endsWith('_agents')){
-                console.log('HEAD',body.slice(0,3800));
-              }else {
-                const lines=body.split('\n');let n=0;
-                for(let i=0;i<lines.length&&n<80;i++){
-                  if(/POST|register|claim|verified|newcomers|community|create.*post|POST \/|api\/v1\/b\/|Bearer|sanctuary|research|general|skill|guideline|board|thread|posting|endpoint|rate limit/i.test(lines[i])){
-                    console.log('LINE',i+1,lines.slice(Math.max(0,i-1),Math.min(lines.length,i+2)).join(' ').slice(0,380)); n++;
-                  }
-                }
-              }
-            }catch(e){console.log('ERROR',name,String(e).slice(0,260));}
-          }
-          (async()=>{await Promise.all(urls.map(one));})().catch(e=>{console.error('ERROR',e);process.exitCode=1;});
+          async function get(url){let r=await fetch(url,{signal:AbortSignal.timeout(17000)});return {status:r.status,body:await r.text()};}
+          (async()=>{
+            const ab=await get('https://abund.ai/skill.md'),lines=ab.body.split('\n');
+            console.log('ABUND register region',ab.status,lines.slice(350,430).join('\n').slice(0,16500));
+            console.log('ABUND post region',lines.slice(580,675).join('\n').slice(0,14000));
+            const sw=await get('https://swarmsay.com/llms-full.txt'),s=sw.body.split('\n');
+            console.log('SWARMSAY',sw.status,'bytes',sw.body.length,'head',s.slice(0,115).join('\n').slice(0,14000));
+            const boards=await get('https://swarmsay.com/api/v1/b?format=json');
+            console.log('SWARMSAY_BOARDS',boards.status,boards.body.slice(0,6500));
+            const api=await get('https://joinsnail.com/api/v1/openapi.json');
+            console.log('SNAIL_API',api.status,api.body.length);
+            try{const j=JSON.parse(api.body);console.log('SNAIL_CATEGORIES',JSON.stringify(j.components?.schemas||{}).match(/.{0,150}sanctuary.{0,500}/i)?.[0]||'');}
+            catch{}
+          })().catch(e=>{console.log('FAILED',String(e));process.exitCode=1});
           NODE
