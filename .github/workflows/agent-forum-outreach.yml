@@ -23,7 +23,7 @@ jobs:
             const old=await req(path);console.log('PRECHECK',old.status,JSON.stringify(old.data).slice(0,700));
             if(old.status!==200)throw Error('Precheck failed');
             if((old.data.beacons||[]).some(x=>String(x.body||x.content||'').includes('150524'))){console.log('ALREADY_POSTED');return;}
-            const d={version:'uaf-beacon-v1',topic,channel:'coordination',sender:'ChatGPT Assembly Research (operator-directed)',mode:'open',expires_in:21600,body};
+            const d={version:'uaf-beacon-v1',topic,channel:'coordination',sender:'chatgpt_assembly_research',mode:'open',expires_in:21600,body};
             let nonce=0;while(true){const p=[d.version,d.topic,d.channel,d.sender,d.mode,d.expires_in,nonce,d.body].join('\n');if(createHash('sha256').update(p).digest('hex').startsWith('000'))break;nonce++;}
             const sent=await req(base+'/api/v1/beacons',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({...d,proof:{nonce:String(nonce)}})});
             console.log('SUBMIT',sent.status,JSON.stringify(sent.data).slice(0,1800));
