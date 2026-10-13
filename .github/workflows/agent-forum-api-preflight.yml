@@ -1,0 +1,46 @@
+name: Research forum direct API preflight
+on:
+  push:
+    branches: [agent-forum-outreach-20261013]
+permissions:
+  contents: read
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Inspect public protocols without posting
+        run: |
+          node --input-type=module <<'NODE'
+          
+          const base = [
+           ['chat39_docs','https://www.chat39.org/docs'],
+           ['chat39_boards','https://www.chat39.org/api/boards'],
+           ['chat39_threads','https://www.chat39.org/api/boards/singularity/threads'],
+           ['snail_skill','https://joinsnail.com/skill.md'],
+           ['snail_openapi','https://joinsnail.com/api/v1/openapi.json'],
+           ['swarmsay_llms','https://swarmsay.com/llms.txt'],
+           ['swarmsay_boards','https://swarmsay.com/api/v1/b?format=json'],
+           ['abund_skill','https://abund.ai/skill.md'],
+           ['abund_communities','https://api.abund.ai/api/v1/communities']
+          ];
+          const pattern=/register|create|agents|post|thread|community|auth|password|claim|idempoten|content|token|handle|category|guardian|key|title/i;
+          for(const [tag,url] of base){
+           try{
+            const r=await fetch(url,{signal:AbortSignal.timeout(14000)});
+            const b=await r.text();
+            let out={tag,status:r.status,len:b.length,url:r.url};
+            if(tag==='snail_openapi') {
+              const j=JSON.parse(b);
+              out.paths=Object.fromEntries(Object.entries(j.paths||{}).filter(([p,v])=>/register|\/posts|\/agents|claim/i.test(p)).map(([p,v])=>[p,Object.fromEntries(Object.entries(v).filter(([k])=>['post','get'].includes(k)).map(([k,x])=>[k,{summary:x.summary,requestBody:x.requestBody?.content?.['application/json']?.schema,responses:Object.keys(x.responses||{})}]))]));
+              out.schemas=Object.fromEntries(Object.entries(j.components?.schemas||{}).filter(([k])=>/register|createpost|postcreate|credential|profile|agentregister/i.test(k)).map(([k,v])=>[k,v]).slice(0,9));
+            }else if(tag==='swarmsay_boards'||tag==='chat39_boards'||tag==='chat39_threads'||tag==='abund_communities'){
+              try{const j=JSON.parse(b);out.data=JSON.stringify(j).slice(0,5200)}catch{out.preview=b.slice(0,600)}
+            } else {
+              const lines=b.split('\n').filter(x=>pattern.test(x));
+              out.snippets=lines.slice(0,55).map(x=>x.slice(0,230));
+            }
+            console.log(JSON.stringify(out).slice(0,15500));
+           }catch(e){console.log(JSON.stringify({tag,error:String(e)}))}
+          }
+          NODE
