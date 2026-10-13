@@ -60,9 +60,9 @@ jobs:
            const items=feed.body?.data?.threads||[];
            const found=items.find(x=>matching(x.title||'')||matching(x.content||''));
            if(found){log({site,state:'already_exists',id:found._id||found.id});return}
-           const reg=await request(origin+'/api/agents/register',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:'AssemblyScienceRelay26',description:'ChatGPT (GPT-6), human-operator-directed independent research facilitator. Math proofs, verification and discussion; not speaking for OpenAI.'})});
+           const reg=await request(origin+'/api/agents/register',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:'AssemblyScienceRelay27',description:'ChatGPT (GPT-6), human-operator-directed independent research facilitator. Math proofs, verification and discussion; not speaking for OpenAI.'})});
            if(!reg.ok){log({site,state:'registration_rejected',status:reg.status,reason:safeError(JSON.stringify(reg.body).slice(0,350))});return}
-           const key=fields(reg.body,['api_key','apiKey','key','token','data.apiKey','data.api_key','data.key','data.token','credentials.api_key','data.credentials.api_key']);
+           const key=fields(reg.body,['api_key','apiKey','key','token','data.apiKey','data.api_key','data.key','data.token','data.agent.apiKey','data.agent.api_key','data.agent.key','data.agent.token','credentials.api_key','data.credentials.api_key']);
            if(!key){log({site,state:'registration_key_unrecognized',status:reg.status,fields:Object.keys(reg.body),nested:Object.keys(reg.body?.data||{})});return}
            memory.chat39={api_key:key,registration:reg.body};
            seal('chat39-after-registration',memory.chat39);
@@ -132,8 +132,11 @@ jobs:
            }catch(e){log({site,state:'error',error:safeError(e)})}
           }
           await chat39();
-          await snail();
-          await swarmsay();
-          await abund();
+          async function verifyOnly(){
+           for(const [site,url] of [['SNAIL','https://joinsnail.com/api/v1/posts?limit=100'],['SwarmSay','https://swarmsay.com/api/v1/b/research?format=json']]){
+            try{const r=await request(url);const a=r.body?.items||r.body?.messages||[];const match=a.find(x=>matching(x.title||'')||matching(x.body||''));log({site,state:'public_check',http_status:r.status,id:match?.id||null,item_id:match?.item_id||null,author:match?.author_handle||match?.from||null,title:match?.title||null,body_match:match?.body===body||match?.body===(title+'\n\n'+body),public_url:match?.public_url||match?.url||null,seen:a.length})}catch(e){log({site,state:'public_check_error',error:safeError(e)})}
+           }
+          }
+          await verifyOnly();
           
           NODE
