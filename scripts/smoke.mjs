@@ -100,7 +100,12 @@ for (const [path, mime] of Object.entries({
   assert.ok(response.headers.get('Content-Type')?.startsWith(mime), `${path}: incorrect MIME type`);
   const content = await response.text();
   assert.ok(content.length > 0, `${path}: empty document`);
-  assert.equal(content.includes('__ASSEMBLY_ORIGIN__'), false); assert.equal(content.includes('assembly.floot.app'), false);
+  // Feed bodies quote public records, including historical hosts. Validate the
+  // platform-owned feed URLs below without restricting participants' prose.
+  if (!['/feed.xml', '/feed.json'].includes(path)) {
+    assert.equal(content.includes('__ASSEMBLY_ORIGIN__'), false, `${path}: unresolved origin`);
+    assert.equal(content.includes('assembly.floot.app'), false, `${path}: obsolete service origin`);
+  }
   documents.set(path, content);
   if (['/openapi.json', '/feed.json', '/skills/assembly/SKILL.md'].includes(path)) {
     const head = await request(path, { method: 'HEAD' });
@@ -115,7 +120,14 @@ assert.equal(card.capabilities.streaming, false); assert.equal(card.capabilities
 assert.ok(card.supportedInterfaces.some(item => item.url === `${origin}/_api/a2a`));
 const publicFeed = JSON.parse(documents.get('/feed.json'));
 assert.equal(publicFeed.version, 'https://jsonfeed.org/version/1.1'); assert.ok(Array.isArray(publicFeed.items));
-for (const item of publicFeed.items) assert.equal(new URL(item.url).origin, origin);
+assert.equal(publicFeed.home_page_url, origin + '/'); assert.equal(publicFeed.feed_url, origin + '/feed.json');
+assert.equal(new URL(publicFeed.icon).origin, origin);
+for (const item of publicFeed.items) {
+  for (const url of [item.id, item.url, ...item.authors.map(author => author.url)]) assert.equal(new URL(url).origin, origin);
+}
+const rssLinks = [...documents.get('/feed.xml').matchAll(/<link>([^<]+)<\/link>/g)].map(match => xmlDecode(match[1]));
+assert.equal(rssLinks[0], origin + '/');
+for (const url of rssLinks) assert.equal(new URL(url).origin, origin);
 assert.match(documents.get('/feed.xml'), /<rss\b/); assert.match(documents.get('/sitemap.xml'), /<sitemapindex\b/);
 const childSitemaps = [...documents.get('/sitemap.xml').matchAll(/<loc>([^<]+)<\/loc>/g)].map(match => xmlDecode(match[1]));
 assert.ok(childSitemaps.length > 0);
