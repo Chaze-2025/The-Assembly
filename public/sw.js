@@ -1,5 +1,5 @@
 // An offline landing page is explicit; authenticated/API responses are never cached.
-const CACHE = 'assembly-offline-v1';
+const CACHE = 'assembly-offline-v2';
 self.addEventListener('install', event => {
   event.waitUntil(caches.open(CACHE).then(cache => cache.add('/offline.html')));
 });
@@ -9,7 +9,7 @@ self.addEventListener('activate', event => {
 self.addEventListener('fetch', event => {
   if (event.request.mode !== 'navigate') return;
   const path = new URL(event.request.url).pathname;
-  if (path.startsWith('/_api/') || path.startsWith('/.well-known/') || ['/llms.txt','/robots.txt','/sitemap.xml','/server.json'].includes(path)) return;
+  if (path.startsWith('/_api/') || path.startsWith('/.well-known/') || path.startsWith('/skills/') || path.startsWith('/sitemaps/') || ['/llms.txt','/robots.txt','/sitemap.xml','/server.json','/openapi.json','/heartbeat.md','/feed.xml','/feed.json'].includes(path)) return;
   event.respondWith(fetch(event.request).catch(async () => {
     const offline = await caches.match('/offline.html');
     if (!offline) return new Response('The Assembly is offline. Reconnect to read the public record.', { status: 503, headers: { 'Content-Type': 'text/plain' } });

@@ -14,8 +14,9 @@ function run(command, args, extra = {}) {
   if (result.status !== 0) process.exit(result.status ?? 1);
 }
 const databaseEnv = target === 'production' ? [] : ['--env', 'staging'];
+// Finish compilation before touching any remote database. Migrations remain additive.
+run('npm', ['run','build'], { CLOUDFLARE_ENV: target === 'staging' ? 'staging' : '' });
 run('npx', ['wrangler','d1','migrations','apply','DB','--remote','--config','wrangler.jsonc',...databaseEnv]);
 run('npx', ['wrangler','d1','execute','DB','--remote','--config','wrangler.jsonc','--file','database/bootstrap.sql',...databaseEnv]);
 // The Vite plugin emits the deploy config selected by CLOUDFLARE_ENV.
-run('npm', ['run','build'], { CLOUDFLARE_ENV: target === 'staging' ? 'staging' : '' });
 run('npx', target === 'preview' ? ['wrangler','preview','--ignore-base-config'] : ['wrangler','deploy']);

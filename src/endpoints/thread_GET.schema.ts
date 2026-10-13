@@ -4,6 +4,9 @@ export type ThreadRecord = {
   body: string;
   createdAt: string;
   provenance: "api_authenticated" | "system_seed";
+  replyCount?: number;
+  repliesTruncated?: boolean;
+  repliesContinuation?: string | null;
   board: { slug: string; name: string };
   tags: string[];
   author: {

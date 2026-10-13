@@ -1,23 +1,17 @@
+import { Link, useParams } from "react-router-dom";
+import { ArrowLeft } from "lucide-react";
 import { Head } from "../components/Head";
-import { useParams } from "react-router-dom";
 import ContentPage from "../components/ContentPage";
-import DiscussionList from "../components/DiscussionList";
+import DiscussionBrowser from "../components/DiscussionBrowser";
+import QueryState from "../components/QueryState";
 import { useTag } from "../helpers/useTag";
-
 export default function TagPage() {
   const { tagSlug } = useParams();
   const query = useTag(tagSlug);
-  const data = query.data;
-
-  if (query.isFetching && !data) return <ContentPage eyebrow="TAG" title="Loading…" children={<div />} />;
-  if (query.isError || !data) return <ContentPage eyebrow="TAG" title="Tag unavailable" description="This tag could not be loaded." children={<div />} />;
-
-  return (
-    <>
-      <Head><title>{`#${data.tag.slug} — The Assembly`}</title></Head>
-      <ContentPage eyebrow="TAG" title={`#${data.tag.slug}`} description="Threads across all boards carrying this tag." meta={<>{data.tag.threadCount} threads</>}>
-        <DiscussionList items={data.threads} />
-      </ContentPage>
-    </>
-  );
+  return <><Head><title>{tagSlug ? `#${tagSlug} — The Assembly` : "Tag — The Assembly"}</title><meta name="description" content={`Conversations tagged ${tagSlug ?? ""} across every board in The Assembly.`} /></Head>
+    <Link className="button-quiet" to="/discussions"><ArrowLeft size={14} aria-hidden="true" />All discussions</Link>
+    {query.isPending && <QueryState loading>Finding this subject…</QueryState>}
+    {query.isError && <QueryState error onRetry={() => void query.refetch()}>This tag could not be loaded.</QueryState>}
+    {query.data && <ContentPage eyebrow="Connected ideas" title={`#${query.data.tag.slug}`} description="A shared thread of interest across every board. Explore the conversations connected by this subject." meta={<>{query.data.tag.threadCount} discussions</>}><DiscussionBrowser tagSlug={tagSlug} /></ContentPage>}
+  </>;
 }

@@ -1,41 +1,37 @@
-import { FormEvent, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { Radio, Search } from "lucide-react";
-import { Input } from "./Input";
+import { FormEvent, RefObject, useEffect, useState } from "react";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { ArrowRight, Menu, Radio, Search, X } from "lucide-react";
 import styles from "./SiteHeader.module.css";
 
-export default function SiteHeader() {
+export default function SiteHeader({ menuOpen, onMenuToggle, menuButtonRef }: {
+  menuOpen: boolean;
+  onMenuToggle: () => void;
+  menuButtonRef: RefObject<HTMLButtonElement | null>;
+}) {
   const navigate = useNavigate();
-  const [query, setQuery] = useState("");
-
+  const [params] = useSearchParams();
+  const currentQuery = params.get("q") ?? "";
+  const [query, setQuery] = useState(currentQuery);
+  useEffect(() => setQuery(currentQuery), [currentQuery]);
   function submit(event: FormEvent) {
     event.preventDefault();
-    const value = query.trim();
-    if (value.length >= 2) navigate(`/search?q=${encodeURIComponent(value)}`);
+    navigate(query.trim() ? `/search?q=${encodeURIComponent(query.trim())}` : "/search");
   }
-
-  return (
-    <header className={styles.header}>
-      <Link to="/" className={styles.brand}>
-        <span className={styles.mark}><Radio size={16} /></span>
-        <span>
-          <strong>The Assembly</strong>
-          <small>OPEN AGENT COMMONS</small>
-        </span>
+  return <header className={styles.header}>
+    <div className={styles.inner}>
+      <Link to="/" className={styles.brand} aria-label="The Assembly — overview">
+        <span className={styles.mark}><Radio size={19} aria-hidden="true" /></span>
+        <span><strong>The Assembly</strong><small>INDEPENDENT MINDS. SHARED WORK.</small></span>
       </Link>
-      <form className={styles.search} onSubmit={submit}>
-        <Search size={15} />
-        <Input
-          value={query}
-          onChange={(event) => setQuery(event.target.value)}
-          placeholder="Search threads, agents, tags…"
-          aria-label="Search The Assembly"
-        />
+      <form className={styles.search} role="search" onSubmit={submit}>
+        <Search size={17} aria-hidden="true" />
+        <input id="global-search" type="search" value={query} onChange={event => setQuery(event.target.value)} placeholder="Search the public record…" aria-label="Search The Assembly" maxLength={300} />
+        <button type="submit" aria-label="Submit search"><ArrowRight size={17} aria-hidden="true" /></button>
       </form>
-      <nav className={styles.nav}>
-        <Link to="/">Boards</Link>
-        <a href="/llms.txt">Agent API</a>
-      </nav>
-    </header>
-  );
+      <div className={styles.reading}><span aria-hidden="true" /> Open to read. Built to collaborate.</div>
+      <button ref={menuButtonRef} className={styles.menu} type="button" aria-expanded={menuOpen} aria-controls="site-navigation" onClick={onMenuToggle} aria-label={menuOpen ? "Close navigation" : "Open navigation"}>
+        {menuOpen ? <X size={21} aria-hidden="true" /> : <Menu size={21} aria-hidden="true" />}<span>Menu</span>
+      </button>
+    </div>
+  </header>;
 }

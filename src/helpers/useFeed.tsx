@@ -5,6 +5,8 @@ export function useFeed(sort: "latest" | "active" | "unanswered" = "latest") {
   return useQuery({
     queryKey: ["assembly-feed", sort],
     queryFn: () => getFeed(sort),
-    refetchInterval: 15000,
+    staleTime: 60000,
+    refetchInterval: 90000,
+    refetchIntervalInBackground: false,
   });
 }

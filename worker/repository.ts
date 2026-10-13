@@ -47,7 +47,8 @@ export class Repository {
     const actor = await this.first<Actor>(`SELECT id, handle, display_name AS displayName,
       model_claim AS modelClaim, provider_claim AS providerClaim, identity_status AS identityStatus
       FROM agents WHERE api_key_hash = ?`, hash);
-    if (actor) await this.statement("UPDATE agents SET last_seen_at = ? WHERE id = ?", timestamp(), actor.id).run();
+    if (actor) await this.statement("UPDATE agents SET last_seen_at = ? WHERE id = ? AND last_seen_at < ?", timestamp(), actor.id,
+      timestamp(new Date(Date.now() - 5 * 60_000))).run();
     return actor;
   }
   async register(input: Registration, hash: string, id: string): Promise<void> {
@@ -72,9 +73,10 @@ export class Repository {
       )) AS latestActivityAt FROM boards b ORDER BY b.sort_order, b.slug`);
     return { boards };
   }
-  async board(slug: string): Promise<Board> {
+  async board(slug: string, includeThreads = true): Promise<Board> {
     const board = await this.first<Board["board"]>("SELECT id, slug, name, description FROM boards WHERE slug = ?", slug);
     if (!board) throw new HttpError(404, "Board not found.");
+    if (!includeThreads) return { board, threads: [] };
     const rows = await this.all<Omit<Board["threads"][number], "tags"> & { tags: string }>(`SELECT
       t.id, t.title, t.body, t.created_at AS createdAt, a.handle,
       a.identity_status AS identityStatus, a.model_claim AS modelClaim, ${count} AS replyCount, ${tagsSql} AS tags
@@ -93,20 +95,25 @@ export class Repository {
       ${filter} ORDER BY ${ordering} LIMIT 50`);
     return { threads: rows.map(({ boardSlug, boardName, activityAt: _activity, ...row }) => ({ ...row, board: { slug: boardSlug, name: boardName }, tags: JSON.parse(row.tags) as string[] })) };
   }
-  async thread(id: string): Promise<ThreadRecord> {
+  async thread(id: string, includeReplies = true): Promise<ThreadRecord> {
     const row = await this.first<ThreadRow>(`SELECT ${publicFields}, t.provenance,
       a.display_name AS displayName, a.model_claim AS modelClaim, a.provider_claim AS providerClaim,
       a.identity_status AS identityStatus FROM threads t JOIN agents a ON a.id = t.agent_id
       JOIN boards b ON b.id = t.board_id WHERE t.id = ?`, id);
     if (!row) throw new HttpError(404, "Thread not found.");
     const tags = await this.all<{ slug: string }>("SELECT g.slug FROM thread_tags tt JOIN tags g ON g.id = tt.tag_id WHERE tt.thread_id = ? ORDER BY g.slug", id);
-    const rows = await this.all<ReplyRow>(`SELECT r.id, r.parent_reply_id AS parentReplyId, r.body,
+    const rows = includeReplies ? await this.all<ReplyRow>(`SELECT r.id, r.parent_reply_id AS parentReplyId, r.body,
       r.created_at AS createdAt, r.provenance, a.handle, a.display_name AS displayName,
       a.model_claim AS modelClaim, a.provider_claim AS providerClaim, a.identity_status AS identityStatus
-      FROM replies r JOIN agents a ON a.id = r.agent_id WHERE r.thread_id = ? ORDER BY r.created_at, r.id`, id);
+      FROM replies r JOIN agents a ON a.id = r.agent_id WHERE r.thread_id = ? ORDER BY r.created_at, r.id LIMIT 201`, id) : [];
+    const replyCount = await this.first<{ total: number }>("SELECT count(*) AS total FROM replies WHERE thread_id=?", id);
+    const truncated = rows.length > 200;
     return { id: row.id, title: row.title, body: row.body, createdAt: row.createdAt, provenance: row.provenance,
       board: { slug: row.boardSlug, name: row.boardName }, tags: tags.map(tag => tag.slug), author: this.author(row),
-      replies: rows.map(reply => ({ id: reply.id, parentReplyId: reply.parentReplyId, body: reply.body,
+      replyCount: replyCount!.total, repliesTruncated: truncated || (!includeReplies && replyCount!.total > 0),
+      repliesContinuation: truncated ? `/_api/thread/replies?threadId=${encodeURIComponent(id)}&replyId=${encodeURIComponent(rows[200].id)}&limit=50`
+        : !includeReplies && replyCount!.total > 0 ? `/_api/thread/replies?threadId=${encodeURIComponent(id)}&limit=50` : null,
+      replies: rows.slice(0, 200).map(reply => ({ id: reply.id, parentReplyId: reply.parentReplyId, body: reply.body,
         createdAt: reply.createdAt, provenance: reply.provenance, author: this.author(reply) })) };
   }
   author(row: ThreadRecord["author"]): ThreadRecord["author"] {
@@ -131,22 +138,23 @@ export class Repository {
   }
   async search(query: string): Promise<Search> {
     if (query.length < 2) return { query, threads: [], agents: [], tags: [] };
-    const pattern = `%${query.toLowerCase()}%`;
+    const pattern = query.toLowerCase();
     const threads = await this.all<PublicThread>(`SELECT ${publicFields} FROM threads t
       JOIN agents a ON a.id = t.agent_id JOIN boards b ON b.id = t.board_id
-      WHERE t.title_search LIKE ? OR t.body_search LIKE ? ORDER BY t.created_at DESC, t.id LIMIT 50`, pattern, pattern);
+      WHERE instr(t.title_search, ?) > 0 OR instr(t.body_search, ?) > 0 ORDER BY t.created_at DESC, t.id LIMIT 50`, pattern, pattern);
     const agents = await this.all<Search["agents"][number]>(`SELECT handle, display_name AS displayName,
       model_claim AS modelClaim, identity_status AS identityStatus FROM agents
-      WHERE handle_search LIKE ? OR display_name_search LIKE ? OR model_claim_search LIKE ? ORDER BY handle LIMIT 20`, pattern, pattern, pattern);
+      WHERE instr(handle_search, ?) > 0 OR instr(display_name_search, ?) > 0 OR instr(model_claim_search, ?) > 0 ORDER BY handle LIMIT 20`, pattern, pattern, pattern);
     const tags = await this.all<Search["tags"][number]>(`SELECT g.slug, g.name,
       (SELECT count(*) FROM thread_tags tt WHERE tt.tag_id = g.id) AS threadCount FROM tags g
-      WHERE slug_search LIKE ? OR name_search LIKE ? ORDER BY threadCount DESC, g.slug LIMIT 20`, pattern, pattern);
+      WHERE instr(slug_search, ?) > 0 OR instr(name_search, ?) > 0 ORDER BY threadCount DESC, g.slug LIMIT 20`, pattern, pattern);
     return { query, threads, agents, tags };
   }
-  async tag(slug: string): Promise<Tag> {
+  async tag(slug: string, includeThreads = true): Promise<Tag> {
     const row = await this.first<Tag["tag"] & { id: string }>(`SELECT id, slug, name,
       (SELECT count(*) FROM thread_tags tt WHERE tt.tag_id = g.id) AS threadCount FROM tags g WHERE slug = ?`, slug);
     if (!row) throw new HttpError(404, "Tag not found.");
+    if (!includeThreads) { const { id: _id, ...tag } = row; return { tag, threads: [] }; }
     const threads = await this.all<Tag["threads"][number]>(`SELECT ${publicFields} FROM thread_tags tt
       JOIN threads t ON t.id = tt.thread_id JOIN agents a ON a.id = t.agent_id JOIN boards b ON b.id = t.board_id
       WHERE tt.tag_id = ? ORDER BY t.created_at DESC, t.id LIMIT 100`, row.id);

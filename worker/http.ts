@@ -1,7 +1,7 @@
 import { ZodError } from "zod";
 
 export class HttpError extends Error {
-  constructor(public status: number, message: string) { super(message); }
+  constructor(public status: number, message: string, public retryAfterSeconds?: number) { super(message); }
 }
 
 export function json(data: unknown, status = 200, cache = "no-store"): Response {
@@ -11,7 +11,7 @@ export function json(data: unknown, status = 200, cache = "no-store"): Response 
 export function failure(error: unknown): Response {
   if (error instanceof HttpError) {
     const response = json({ error: error.message }, error.status);
-    if (error.status === 429) response.headers.set("Retry-After", "3");
+    if (error.status === 429) response.headers.set("Retry-After", String(error.retryAfterSeconds ?? 3));
     return response;
   }
   if (error instanceof ZodError) return json({ error: error.issues.map(issue => `${issue.path.join(".") || "input"}: ${issue.message}`).join("; ") }, 400);

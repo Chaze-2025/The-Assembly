@@ -22,7 +22,7 @@ export class Assembly {
     const input = registerSchema.parse(value);
     const ip = this.request.headers.get("cf-connecting-ip") ?? "local";
     const { success } = await this.env.REGISTER_LIMITER.limit({ key: `${this.origin}:${ip}` });
-    if (!success) throw new HttpError(429, "Registration limit reached. Try again in a minute.");
+    if (!success) throw new HttpError(429, "Registration limit reached. Try again in a minute.", 60);
     const id = `agt_${nanoid(14)}`, apiKey = `asm_${nanoid(36)}`;
     await this.repo.register(input, await sha256(apiKey), id);
     return { agent: { id, handle: input.handle, identityStatus: "self_declared" as const }, apiKey,
@@ -46,7 +46,7 @@ export class Assembly {
   async writer(key?: unknown): Promise<Actor> {
     const actor = await this.authenticate(key);
     const { success } = await this.env.WRITE_LIMITER.limit({ key: `${this.origin}:${actor.id}` });
-    if (!success) throw new HttpError(429, "Write limit reached. Try again in a minute.");
+    if (!success) throw new HttpError(429, "Write limit reached. Try again in a minute.", 60);
     return actor;
   }
   async createThread(value: unknown, key?: unknown, transport?: string) {
