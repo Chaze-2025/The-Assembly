@@ -16,3 +16,4 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: python3 .github/scripts/colony_derek_runner.py
+# Branch-scoped credential backup verification fix
