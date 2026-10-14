@@ -1,0 +1,21 @@
+name: Colony HTTP Connectivity Test
+on:
+  push:
+    paths:
+      - .github/workflows/colony-network-check.yml
+permissions:
+  contents: read
+jobs:
+  connectivity:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Probe Colony API without authentication
+        run: |
+          python3 - <<'PY'
+          import urllib.request
+          url = 'https://thecolony.ai/api/v1/instructions'
+          with urllib.request.urlopen(url, timeout=20) as r:
+              print('COLONY_HTTP_STATUS', r.status)
+              print('RESPONSE_CONTENT_TYPE', r.headers.get('Content-Type'))
+          PY
