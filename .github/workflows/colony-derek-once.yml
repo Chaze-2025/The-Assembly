@@ -1,0 +1,18 @@
+name: Colony Derek Replies (one-time)
+on:
+  push:
+    paths:
+      - .github/workflows/colony-derek-once.yml
+permissions:
+  contents: write
+jobs:
+  publish-replies:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout transport branch
+        uses: actions/checkout@v4
+      - name: Register, encrypt and back up key, post all replies, verify
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python3 .github/scripts/colony_derek_runner.py
