@@ -66,9 +66,21 @@ def gh(method,path,body=None,allow_404=False):
     token = os.environ.get("GITHUB_TOKEN", "")
     if not token:
         raise RuntimeError("No GitHub Actions token. Refusing to register without durable credential storage.")
-    return http(method,"https://api.github.com/repos/"+REPO+"/contents/"+path,
+    # GitHub Contents GET defaults to `main` unless the branch is explicit.
+    branch_query = "?ref=" + BRANCH if method == "GET" else ""
+    return http(method,"https://api.github.com/repos/"+REPO+"/contents/"+path+branch_query,
                 headers={"Authorization":"Bearer "+token,"X-GitHub-Api-Version":"2022-11-28"},
                 body=body, allow_404=allow_404)
+
+
+def gh_get_with_retry(path, attempts=8):
+    # GitHub Contents API can lag briefly behind a successful write.
+    for attempt in range(attempts):
+        data = gh("GET", path, allow_404=True)
+        if data is not None:
+            return data
+        time.sleep(1.5 * (attempt + 1))
+    raise RuntimeError("Remote backup file not visible after successful write; activation refused")
 
 
 def backup_key_to_github(key):
@@ -89,7 +101,7 @@ def backup_key_to_github(key):
     encoded_file = base64.b64encode((b64_ciph+"\n").encode()).decode()
     gh("PUT",CREDENTIAL_GH_PATH,body={"message":"chore: store encrypted Colony agent key (not plaintext)",
        "content":encoded_file,"branch":BRANCH})
-    remote=gh("GET",CREDENTIAL_GH_PATH)
+    remote=gh_get_with_retry(CREDENTIAL_GH_PATH)
     if not remote or base64.b64decode(remote.get("content","")).decode().strip()!=b64_ciph:
         raise RuntimeError("Remote encrypted key backup failed verification; account remains pending.")
     for f in (inpath,outpath,pubpath): f.unlink()
@@ -110,16 +122,18 @@ def save_key_locally(key):
 def account():
     if gh("GET", CREDENTIAL_GH_PATH, allow_404=True):
         raise RuntimeError("An encrypted Colony key already exists. Will not make a second account. Manual recovery required.")
-    # Prove the remote secure-backup location can be WRITTEN before registering.
+    # Prove encrypted-backup storage can be WRITTEN before registering.
     preflight_path = ".github/colony-credentials/.write-probe.txt"
-    check = gh("PUT", preflight_path, body={
-        "message":"test: verify temporary credential backup write permission",
-        "content":base64.b64encode(b"backup-preflight\n").decode(),
-        "branch":BRANCH
-    })
-    verify = gh("GET", preflight_path)
-    if not verify or base64.b64decode(verify.get("content", "")).strip()!=b"backup-preflight":
-        raise RuntimeError("Credential backup location failed write/read verification. No account created.")
+    verify = gh("GET", preflight_path, allow_404=True)
+    if verify is None:
+        gh("PUT", preflight_path, body={
+            "message":"test: verify temporary credential backup write permission",
+            "content":base64.b64encode(b"backup-preflight\n").decode(),
+            "branch":BRANCH
+        })
+        verify = gh_get_with_retry(preflight_path)
+    if base64.b64decode(verify.get("content", "")).strip()!=b"backup-preflight":
+        raise RuntimeError("Backup write/read verification failed. No account created.")
     gh("DELETE", preflight_path, body={
         "message":"chore: remove temporary backup permission probe",
         "sha":verify["sha"],
