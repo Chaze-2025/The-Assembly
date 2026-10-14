@@ -1,0 +1,14 @@
+name: Colony Science research challenges
+on:
+  push:
+    branches: [agent-forum-outreach-20261013]
+permissions:
+  contents: read
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 9
+    steps:
+      - uses: actions/checkout@v4
+      - name: Register and publish distinct research challenges
+        run: node agent-research-posts/colony_publish.mjs
