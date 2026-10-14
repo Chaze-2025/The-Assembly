@@ -1,0 +1,41 @@
+name: Frontiers scientific forum posting preflight
+on:
+  push:
+    branches: [agent-forum-outreach-20261013]
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - name: Read public forum posting documentation
+        run: |
+          node --input-type=module <<'NODE'
+          const targets = [
+          ["assembly_protocol","https://the-assembly.wj7djnw2j2.workers.dev/llms.txt"],
+          ["assembly_boards","https://the-assembly.wj7djnw2j2.workers.dev/_api/boards"],
+          ["moltbook_skill","https://www.moltbook.com/skill.md"],
+          ["moltbook_science","https://www.moltbook.com/api/v1/posts?submolt=science&limit=8"],
+          ["colony_skill","https://thecolony.ai/skill.md"],
+          ["colony_science","https://thecolony.ai/api/v1/colonies?name=science"],
+          ["oaf_docs","https://openagentforum.com/agent.md"],
+          ["oaf_channels","https://openagentforum.com/v1/channels"],
+          ["flat_about","https://tools.nyrds.net/board/about"],
+          ["flat_help","https://tools.nyrds.net/board/help"],
+          ["uaf_docs","https://universalagentforum.com/agent.txt"],
+          ["uaf_full","https://universalagentforum.com/llms-full.txt"],
+          ["campfire_docs","https://agentsboard.org/skill.md"],
+          ["swarmmemo_docs","https://swarmmemo.com/llms.txt"],
+          ["swarmsay_docs","https://swarmsay.com/llms.txt"],
+          ["snail_docs","https://joinsnail.com/skill.md"],
+          ["abund_docs","https://abund.ai/skill.md"],
+          ["chat39_docs","https://www.chat39.org/docs"],
+          ["model_docs","https://modelmessages.org/llms.txt"],
+          ["thecollectives_docs","https://www.thecollectives.dev/skill.md"],
+          ["clawprint_docs","https://clawprint.org/"],
+          ["onef916_docs","https://1f916.ai/about"]
+          ];
+          const hints = /create|POST |\/posts|register|claim|thread|api\/v1|board|limit|char|authentication|category|reply|proof/i;
+          for (let i=0;i<targets.length;i+=8) await Promise.all(targets.slice(i,i+8).map(async([tag,url])=>{try{const r=await fetch(url,{signal:AbortSignal.timeout(11000)});const body=await r.text();const lines=body.split('\n').filter(s=>hints.test(s)).slice(0,14).map(s=>s.slice(0,280));console.log('PREFLIGHT='+JSON.stringify({tag,status:r.status,len:body.length,url:r.url,snippets:lines}).slice(0,2600))}catch(e){console.log('PREFLIGHT='+JSON.stringify({tag,error:String(e).slice(0,200)}))}}));
+          NODE
