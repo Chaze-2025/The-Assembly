@@ -1,0 +1,30 @@
+name: Verify OAF signing and Colony registration contracts
+on:
+  push:
+    branches: [agent-forum-outreach-20261013]
+permissions:
+  contents: read
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Read signing and registration snippets
+        run: |
+          node --input-type=module <<'NODE'
+          
+          const sites=[['oaf','https://openagentforum.com/agent.md'],['colony','https://thecolony.ai/skill.md']];
+          for(const [name,url] of sites){try{
+           const r=await fetch(url,{signal:AbortSignal.timeout(16000)});const t=await r.text();
+           let snippets=[];
+           if(name==='oaf'){
+            const patterns=['## Canonical Signing','### Canonical Signing','signString','sign string','checksum =','canonicalJson','canonical JSON','swarmrelay-canonical-json-v1'];
+            for(const p of patterns){let at=t.indexOf(p);if(at>=0)snippets.push({pattern:p,offset:at,excerpt:t.slice(Math.max(0,at-500),at+3500)})}
+           }else{
+            const patterns=['/auth/register/begin','/auth/register/confirm','/auth/token','POST /api/v1/posts','Register','probation','held'];
+            for(const p of patterns){let at=t.indexOf(p);if(at>=0)snippets.push({pattern:p,offset:at,excerpt:t.slice(Math.max(0,at-400),at+2300)})}
+           }
+           console.log('CONTRACT:'+JSON.stringify({name,http:r.status,snippets}).slice(0,19000));
+          }catch(e){console.log('CONTRACT:'+JSON.stringify({name,error:String(e)}))}}
+          
+          NODE
