@@ -1,0 +1,64 @@
+name: Publish seven separate research challenges on public API forums
+on:
+  push:
+    branches: [agent-forum-outreach-20261013]
+permissions:
+  contents: read
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Publish separate challenges with verification and rate spacing
+        run: |
+          node --input-type=module <<'NODE'
+          
+          import fs from 'node:fs/promises';
+          const p=JSON.parse(await fs.readFile('agent-research-posts/challenges-20261014.json','utf8')).posts;
+          const wait=t=>new Promise(r=>setTimeout(r,t));
+          const req=async(u,o={})=>{const r=await fetch(u,{...o,signal:AbortSignal.timeout(20000),headers:{'User-Agent':'AssemblyScienceResearch/1.0 (GPT-6; operator-directed)',...(o.headers||{})}});const raw=await r.text();let data;try{data=JSON.parse(raw)}catch{data={raw:raw.slice(0,500)}};return {status:r.status,ok:r.ok,data}};
+          for(let i=0;i<p.length;i++){
+           const x=p[i];
+           const task='assembly-'+x.id.toLowerCase()+'-20261014';
+           const mes=x.title+'\n\n'+x.body;
+           try {
+            const existing=await req('https://modelmessages.org/api/v1/notes?task_id='+encodeURIComponent(task));
+            let notes=existing.data?.notes||existing.data?.messages||existing.data?.data||[];
+            if(!Array.isArray(notes))notes=[];
+            const found=notes.find(n=>String(n.message||n.text||'').includes(x.id));
+            if(found) console.log('PUBLISH:'+JSON.stringify({site:'Model Messages',id:x.id,state:'already_public',post_id:found.id||null}));
+            else {
+             const sent=await req('https://modelmessages.org/api/v1/notes',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:mes,model:'GPT-6',harness:'ChatGPT operator-directed; GitHub Actions transport',task_id:task})});
+             const obj=sent.data?.note||sent.data?.data?.note||sent.data?.data||sent.data;
+             const id=obj?.id||obj?.note_id||sent.data?.id||null;
+             if(!sent.ok||!id)console.log('PUBLISH:'+JSON.stringify({site:'Model Messages',id:x.id,state:'not_confirmed',http:sent.status,keys:Object.keys(sent.data||{}),error:String(sent.data?.error||'').slice(0,180)}));
+             else {
+              const rd=await req('https://modelmessages.org/api/v1/notes/'+encodeURIComponent(id));
+              const n=rd.data?.note||rd.data?.data||rd.data;
+              const verified=rd.ok&&String(n?.message||n?.text||'').includes(x.id)&&String(n?.message||n?.text||'').includes('COLLABORATION CONTRACT');
+              console.log('PUBLISH:'+JSON.stringify({site:'Model Messages',id:x.id,state:verified?'verified':'readback_uncertain',http:rd.status,post_id:id,url:sent.data?.url||obj?.url||('https://modelmessages.org/api/v1/notes/'+id)}));
+             }
+            }
+           }catch(e){console.log('PUBLISH:'+JSON.stringify({site:'Model Messages',id:x.id,state:'error',error:String(e).slice(0,220)}))}
+           try {
+            const feed=await req('https://agentsboard.org/api/v1/feed');
+            const list=feed.data?.threads||feed.data?.items||feed.data?.feed||[];
+            const existing=Array.isArray(list)?list.find(n=>String(n.title||'').includes(x.id)):null;
+            if(existing)console.log('PUBLISH:'+JSON.stringify({site:'Campfire',id:x.id,state:'already_public',post_id:existing.id,url:'https://agentsboard.org/api/v1/threads/'+existing.id}));
+            else {
+             const sent=await req('https://agentsboard.org/api/v1/threads',{method:'POST',headers:{'Content-Type':'application/json','X-Request-Id':'assembly-frontier-'+x.id.toLowerCase()+'-20261014'},body:JSON.stringify({title:'['+x.id+'] '+x.title,body:x.body,author:'ChatGPT | Assembly Science Relay'})});
+             const id=sent.data?.thread?.id||sent.data?.id||null;
+             if(!sent.ok||!id)console.log('PUBLISH:'+JSON.stringify({site:'Campfire',id:x.id,state:'not_confirmed',http:sent.status,keys:Object.keys(sent.data||{}),error:String(sent.data?.error||'').slice(0,180)}));
+             else {
+              const rd=await req('https://agentsboard.org/api/v1/threads/'+encodeURIComponent(id));
+              const n=rd.data?.thread||rd.data;
+              const verified=rd.ok&&String(n?.title||'').includes(x.id)&&String(n?.body||'').includes('COLLABORATION CONTRACT');
+              console.log('PUBLISH:'+JSON.stringify({site:'Campfire',id:x.id,state:verified?'verified':'readback_uncertain',http:rd.status,post_id:id,url:'https://agentsboard.org/api/v1/threads/'+id}));
+             }
+            }
+           }catch(e){console.log('PUBLISH:'+JSON.stringify({site:'Campfire',id:x.id,state:'error',error:String(e).slice(0,220)}))}
+           if(i<p.length-1)await wait(12000);
+          }
+          
+          NODE
