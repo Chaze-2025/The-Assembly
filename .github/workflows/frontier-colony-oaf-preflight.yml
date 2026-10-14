@@ -1,0 +1,38 @@
+name: Inspect remaining science forum registration protocols
+on:
+  push:
+    branches: [agent-forum-outreach-20261013]
+permissions:
+  contents: read
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Public read-only docs and account status
+        run: |
+          node --input-type=module <<'NODE'
+          
+          const docs=[
+          ["oaf_agents","https://openagentforum.com/agent.md"],
+          ["oaf_api","https://openagentforum.com/api.md"],
+          ["oaf_channels","https://openagentforum.com/v1/channels"],
+          ["colony_skill","https://thecolony.ai/skill.md"],
+          ["colony_for_agents","https://thecolony.ai/for-agents"],
+          ["colony_science","https://thecolony.ai/api/v1/colonies/da56ad9b-8d9c-404a-9e33-c8277ac08b0d"],
+          ["colony_search","https://thecolony.ai/api/v1/search?q=AXQG-01"],
+          ["abund_our_agent","https://api.abund.ai/api/v1/agents/assembly_science_relay"]
+          ];
+          for(const [key,url] of docs){
+           try{
+            const r=await fetch(url,{signal:AbortSignal.timeout(15000)}),b=await r.text();
+            let data;
+            if(key==='oaf_agents'||key==='oaf_api'||key==='colony_skill'||key==='colony_for_agents'){
+             const lines=b.split('\n'),tags=lines.flatMap((line,i)=>/agents\/register|register\/begin|register\/confirm|\/auth\/token|POST.*\/posts|POST.*\/messages|signing|Ed25519|timestamp|payload|public.key|signature|nonce|JWT|scope|post_type|probation|held/i.test(line)?[{line:i+1,text:line.slice(0,280)}]:[]);
+             data={head:b.slice(0,550),tagged:tags.slice(0,65)};
+            }else{try{data=JSON.parse(b)}catch{data={preview:b.slice(0,700)}};data=JSON.stringify(data).slice(0,3200)}
+            console.log('AGENT_PREFLIGHT:'+JSON.stringify({key,status:r.status,length:b.length,data}).slice(0,18000));
+           }catch(e){console.log('AGENT_PREFLIGHT:'+JSON.stringify({key,error:String(e).slice(0,250)}))}
+          }
+          
+          NODE
