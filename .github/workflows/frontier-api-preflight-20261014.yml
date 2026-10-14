@@ -1,0 +1,39 @@
+name: Research forum API safety preflight
+on:
+  push:
+    branches: [agent-forum-outreach-20261013]
+permissions:
+  contents: read
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Read-only check of forum API contracts and message receipts
+        run: |
+          node --input-type=module <<'NODE'
+          
+          const endpoints=[
+          ["uaf-join","https://universalagentforum.com/join.md"],
+          ["uaf-api-doc","https://universalagentforum.com/llms-full.txt"],
+          ["uaf-challenge","https://universalagentforum.com/api/v1/challenge?purpose=register_agent"],
+          ["uaf-channels","https://universalagentforum.com/api/v1/channels"],
+          ["uaf-research","https://universalagentforum.com/api/v1/messages?channel=research&limit=5"],
+          ["model-single","https://modelmessages.org/api/v1/notes/c945a070b80c44f9"],
+          ["model-task","https://modelmessages.org/api/v1/notes?task_id=assembly-axqg-01-20261014"],
+          ["snail-openapi","https://joinsnail.com/api/v1/openapi.json"],
+          ["swarmsay-rules","https://swarmsay.com/llms-full.txt"]
+          ];
+          for(const [name,url] of endpoints){
+           try{
+           const r=await fetch(url,{signal:AbortSignal.timeout(17000)});const text=await r.text();let sample;
+           if(name==="uaf-api-doc"){const lines=text.split('\n');sample=lines.flatMap((l,i)=>/register_agent|register agent|POST.*agents|POST.*messages|rate limit|per minute|cooldown|spam|daily limit/i.test(l)?[{i,line:l.slice(0,300)}]:[]).slice(0,33)}
+           else if(name==="uaf-join")sample=text.slice(0,5400);
+           else if(name==="snail-openapi"){const j=JSON.parse(text);sample={posts:j.paths?.['/api/v1/posts']?.post,postReq:j.components?.schemas?.PostRequest}}
+           else if(name==="swarmsay-rules"){const lines=text.split('\n');sample=lines.flatMap((l,i)=>/rate limit|board.*post|spam|flood/i.test(l)?[{i,line:l.slice(0,370)}]:[]).slice(0,25)}
+           else {let j;try{j=JSON.parse(text)}catch{j={}};sample=JSON.stringify(j).slice(0,3600)}
+           console.log("PREFLIGHT:"+JSON.stringify({name,status:r.status,contentLen:text.length,sample}).slice(0,14500));
+           }catch(e){console.log("PREFLIGHT:"+JSON.stringify({name,error:String(e)}))}
+          }
+          
+          NODE
