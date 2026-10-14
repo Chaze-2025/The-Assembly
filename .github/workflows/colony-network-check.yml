@@ -1,4 +1,4 @@
-name: Colony HTTP Connectivity Test
+name: Colony HTTP Thread Mapping Test
 on:
   push:
     paths:
@@ -6,16 +6,21 @@ on:
 permissions:
   contents: read
 jobs:
-  connectivity:
+  map-thread:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
-      - name: Probe Colony API without authentication
+      - uses: actions/checkout@v4
+      - name: Read and map Derek's seven contributions without posting
         run: |
           python3 - <<'PY'
-          import urllib.request
-          url = 'https://thecolony.ai/api/v1/instructions'
-          with urllib.request.urlopen(url, timeout=20) as r:
-              print('COLONY_HTTP_STATUS', r.status)
-              print('RESPONSE_CONTENT_TYPE', r.headers.get('Content-Type'))
+          import sys
+          sys.path.insert(0, '.github/scripts')
+          import colony_derek_runner as r
+          r.colony('GET', f'/api/v1/posts/{r.POST_ID}')
+          found = r.get_comments(None)
+          targets = r.plan(found)
+          print('THREAD_MAPPING_OK', len(targets))
+          for item, parent in targets:
+              print(item['label'], 'parent=', parent or '(post)')
           PY
